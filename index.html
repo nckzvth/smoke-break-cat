@@ -235,10 +235,10 @@ import { CONTENT_MODE, assertCompleteCandyRegistry, normalizeContentMode, presen
 'use strict';
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const art={cat:new Image(),catRun:new Image(),catJump:new Image()};
+const art={cat:new Image(),catRunCycle:new Image(),catJump:new Image()};
 for(const image of Object.values(art)) image.decoding='async';
 art.cat.src='./assets/characters/street-cat-base-v1.png';
-art.catRun.src='./assets/characters/street-cat-run-v1.png';
+art.catRunCycle.src='./assets/characters/street-cat-run-cycle-v2.png';
 art.catJump.src='./assets/characters/street-cat-jump-v1.png';
 const $ = id => document.getElementById(id);
 const ui = {
@@ -466,7 +466,7 @@ function renderWardrobe(){
 function activateCosmetic(item){ const cat=cosmeticCategory(item.id); if(ownsCosmetic(item.id)){ save.cosmetics.equipped[cat]=item.id; saveNow(); sfx('equip'); renderWardrobe(); toast('EQUIPPED '+modeCopy(item.name)); return; } const src=item.source||{}; if(src.type==='pack'){ if(save.packs>=src.cost){ save.packs-=src.cost; unlockCosmetic(item,'PACK PURCHASE'); save.cosmetics.equipped[cat]=item.id; saveNow(); renderWardrobe(); updateHud(); } else { sfx('deny'); toast('NOT ENOUGH PACKS'); } } else { sfx('deny'); toast(modeCopy(src.label||'LOCKED')); } }
 
 const game={state:'title',paused:false,distance:0,baseSpeed:250,speed:250,worldX:0,hearts:3,maxHearts:3,nextSmoke:100,nextObstacle:45,nextFlying:80,nextBox:60,inv:0,runTime:0,combo:1,comboTimer:0,lastPuff:0,shake:0,encounters:0,bossPhase:0,smokeable:null,nextSmokeable:null,cigHp:0,cigMax:0,ashMult:1,ghostTime:0,speedBoostTime:0,psyTime:0,tmpHeartCap:0,sprintHeld:false,sprintEnergy:1,sprintActive:false,nearMisses:0};
-cat={x:W*0.25,y:0,vy:0,onGround:true,frame:0};
+cat={x:W*0.25,y:0,vy:0,onGround:true,frame:0,launchTime:0,landTime:0};
 let obstacles=[],flyers=[],boxes=[],particles=[],smokePuffs=[],stars=[];
 for(let i=0;i<85;i++) stars.push({x:Math.random()*2400,y:Math.random()*.55,sz:1+Math.random()*2,tw:Math.random()*6.28});
 
@@ -484,7 +484,7 @@ function weightedSmoke(encounterNo=game.encounters+1){
 }
 function resetRun(){
   game.state='run'; game.paused=false; game.distance=0; game.baseSpeed=250; game.speed=250; game.worldX=0; game.maxHearts=baseMaxHearts(); game.hearts=game.maxHearts; game.nextSmoke=110+Math.random()*40; game.nextObstacle=35; game.nextFlying=65; game.nextBox=55; game.inv=0; game.runTime=0; game.combo=1; game.comboTimer=0; game.lastPuff=0; game.shake=0; game.encounters=0; game.bossPhase=0; game.smokeable=null; game.nextSmokeable=weightedSmoke(1); game.cigHp=0; game.cigMax=0; game.ashMult=1; game.ghostTime=0; game.speedBoostTime=0; game.psyTime=0; game.tmpHeartCap=0; game.sprintHeld=false; game.sprintEnergy=1; game.sprintActive=false; game.nearMisses=0;
-  obstacles=[]; flyers=[]; boxes=[]; particles=[]; smokePuffs=[]; cat.y=groundY-26; cat.vy=0; cat.onGround=true; ui.gameOver.style.display='none'; setAction('run'); updateHud(); save.runs=(save.runs||0)+1; saveNow();
+  obstacles=[]; flyers=[]; boxes=[]; particles=[]; smokePuffs=[]; cat.y=groundY-26; cat.vy=0; cat.onGround=true; cat.frame=0; cat.launchTime=0; cat.landTime=0; ui.gameOver.style.display='none'; setAction('run'); updateHud(); save.runs=(save.runs||0)+1; saveNow();
 }
 function setAction(state){
   if(state!=='smoke' && typeof stopPuffHold==='function') stopPuffHold();
@@ -500,9 +500,9 @@ function setSprint(on){
   if(game.sprintHeld && !was) sfx('sprint');
   ui.sprint.classList.toggle('active',game.sprintHeld && game.sprintEnergy>0.02);
 }
-function jump(){ if(game.state!=='run'||game.paused) return; if(cat.onGround){ cat.vy=-560; cat.onGround=false; sfx('jump'); burst(cat.x,groundY-4,'dust',7); } }
+function jump(){ if(game.state!=='run'||game.paused) return; if(cat.onGround){ cat.vy=-560; cat.onGround=false; cat.launchTime=.12; cat.landTime=0; sfx('jump'); burst(cat.x,groundY-4,'dust',7); } }
 function beginSmoke(){
-  game.state='smoke'; cat.y=groundY-26; cat.vy=0; cat.onGround=true; setAction('smoke'); game.encounters++; game.smokeable=game.nextSmokeable || weightedSmoke(game.encounters); game.nextSmokeable=null; game.bossPhase=0;
+  game.state='smoke'; cat.y=groundY-26; cat.vy=0; cat.onGround=true; cat.launchTime=0; cat.landTime=0; setAction('smoke'); game.encounters++; game.smokeable=game.nextSmokeable || weightedSmoke(game.encounters); game.nextSmokeable=null; game.bossPhase=0;
   const hpBase=85 + game.encounters*17 + Math.min(130,game.distance*.026);
   game.cigMax=hpBase*game.smokeable.hp*(game.smokeable.boss?1.15:1);
   const hot=Math.min(.3,save.up.hotStart*.06); game.cigHp=game.cigMax*(1-hot); game.combo=1; game.comboTimer=0;
@@ -594,7 +594,8 @@ function spawnBox(){
   boxes.push({x:W+70,y,w:36,h,hit:false,reward:chooseBoxReward(),bob:Math.random()*6.28});
 }
 function burst(x,y,type,n){ for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*190,vy:-Math.random()*180-20,life:.35+Math.random()*.4,t:0,type,s:2+Math.random()*5}); }
-function smokeBurst(n){ for(let i=0;i<n;i++) smokePuffs.push({x:cat.x+37+Math.random()*6,y:cat.y-27+Math.random()*5,vx:28+Math.random()*28,vy:-25-Math.random()*34,life:.8+Math.random()*.7,t:0,s:4+Math.random()*9}); }
+function catMouthSocket(){ return {x:cat.x+43,y:cat.y-7}; }
+function smokeBurst(n){ const mouth=catMouthSocket(); for(let i=0;i<n;i++) smokePuffs.push({x:mouth.x+8+Math.random()*6,y:mouth.y-2+Math.random()*4,vx:28+Math.random()*28,vy:-25-Math.random()*34,life:.8+Math.random()*.7,t:0,s:4+Math.random()*9}); }
 
 function update(dt){
   if(game.paused||game.state==='title'||game.state==='dead') return;
@@ -614,8 +615,13 @@ function update(dt){
     if(game.distance>=game.nextFlying && flyers.length===0 && boxes.length===0 && game.nextSmoke-game.distance>48){ spawnFlying(); game.nextFlying=game.distance+Math.max(92,(126+Math.random()*96)/Math.sqrt(phaseHazardMult())); }
     if(game.distance>=game.nextBox && flyers.length===0 && game.nextSmoke-game.distance>34){ spawnBox(); game.nextBox=game.distance+78+Math.random()*112; }
     if(game.distance>=game.nextSmoke){ beginSmoke(); }
-    cat.vy+=1500*dt; cat.y+=cat.vy*dt; if(cat.y>=groundY-26){ cat.y=groundY-26; cat.vy=0; cat.onGround=true; }
-    cat.frame+=dt*(game.speed/45);
+    cat.launchTime=Math.max(0,cat.launchTime-dt); cat.landTime=Math.max(0,cat.landTime-dt);
+    cat.vy+=1500*dt; cat.y+=cat.vy*dt;
+    if(cat.y>=groundY-26){
+      if(!cat.onGround&&cat.vy>0){ cat.landTime=.14; cat.frame=1; burst(cat.x-4,groundY-3,'dust',4); }
+      cat.y=groundY-26; cat.vy=0; cat.onGround=true;
+    }
+    cat.frame+=dt*Math.min(13,7.5+game.speed/90);
     const cx=cat.x-13,cy=cat.y-21,cw=28,ch=43;
     for(const o of obstacles){ o.x-=scroll; o.flap+=dt*10; if(cx<o.x+o.w && cx+cw>o.x && cy<o.y+o.h && cy+ch>o.y){ hit(); o.x=-999; } }
     for(const f of flyers){
@@ -702,7 +708,19 @@ function drawSmokeableDevice(smoke,x,y,ratio=1,scale=1){
   ctx.restore();
 }
 function drawSmokeHeld(smoke,x,y,ratio){
-  smoke=displaySmoke(smoke); const visual=smoke?.visual||'cigarette'; const scale=['vapeLord','hookah','bong','machine','sodaJerk','sundae','gumball','candyCrusher'].includes(visual)?.43:['vape','juiceBox'].includes(visual)?.55:.62; drawSmokeableDevice(smoke,x,y,ratio,scale);
+  smoke=displaySmoke(smoke); const visual=smoke?.visual||'cigarette'; const scale=['vapeLord','hookah','bong','machine','sodaJerk','sundae','gumball','candyCrusher'].includes(visual)?.43:['vape','juiceBox'].includes(visual)?.55:.62;
+  const sticks=['cigarette','menthol','nurse','gold','ghost','cigar','candyStick','mintCandy','wafer','honeycomb','sourBelt','chocolate'];
+  if(sticks.includes(visual)){
+    const baseLen=['cigar','chocolate'].includes(visual)?58*ratio+10:50*ratio+7;
+    ctx.save();ctx.translate(x,y);ctx.scale(-1,1);drawSmokeableDevice(smoke,-baseLen*scale*.5,0,ratio,scale);ctx.restore();
+    return;
+  }
+  const sockets={
+    vape:[0,31],vapeLord:[0,43],hookah:[-32,-32],bong:[0,46],machine:[0,50],
+    juiceBox:[-15,39],sodaJerk:[-18,48],sundae:[-24,6],gumball:[-28,12],candyCrusher:[-31,0]
+  };
+  const [ox,oy]=sockets[visual]||[0,0];
+  drawSmokeableDevice(smoke,x+ox*scale,y+oy*scale,ratio,scale);
 }
 function drawSkinPattern(x,y,skin){
   const p=skin.pattern; ctx.save();
@@ -762,7 +780,7 @@ function drawCatProcedural(x,y,t,smoking=false){
   ctx.fillStyle='#f6d16e';ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-7,y-42);ctx.lineTo(x+1,y-41);ctx.lineTo(x-1,y-36);ctx.lineTo(x-8,y-37);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(x+8,y-42);ctx.lineTo(x+18,y-40);ctx.lineTo(x+16,y-35);ctx.lineTo(x+8,y-37);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-8,y-44);ctx.lineTo(x+1,y-42);ctx.moveTo(x+8,y-43);ctx.lineTo(x+19,y-41);ctx.stroke();
   ctx.fillStyle='#7f3f46';ctx.strokeStyle=ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+6,y-34);ctx.lineTo(x+11,y-34);ctx.lineTo(x+8.5,y-30);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle='#f4d7cb';ctx.lineWidth=1.25;ctx.beginPath();ctx.moveTo(x+2,y-30);ctx.lineTo(x-10,y-27);ctx.moveTo(x+2,y-27);ctx.lineTo(x-9,y-23);ctx.moveTo(x+15,y-30);ctx.lineTo(x+29,y-28);ctx.moveTo(x+15,y-27);ctx.lineTo(x+28,y-23);ctx.stroke();
   drawGlasses(glasses,x+4,y-39); drawHat(hat,x+2,y-57,t);
-  if(smoking){ctx.strokeStyle=ink;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(x+13,y-8);ctx.lineTo(x+27,y-23);ctx.stroke();ctx.strokeStyle=body;ctx.lineWidth=5;ctx.stroke();ctx.fillStyle=body;ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x+28,y-23,4,0,Math.PI*2);ctx.fill();ctx.stroke();const ratio=game.cigMax?game.cigHp/game.cigMax:1;drawSmokeHeld(game.smokeable,x+37,y-32,ratio);}
+  if(smoking){ctx.strokeStyle=ink;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(x+13,y-8);ctx.lineTo(x+27,y-23);ctx.stroke();ctx.strokeStyle=body;ctx.lineWidth=5;ctx.stroke();ctx.fillStyle=body;ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x+28,y-23,4,0,Math.PI*2);ctx.fill();ctx.stroke();const ratio=game.cigMax?game.cigHp/game.cigMax:1;drawSmokeHeld(game.smokeable,x+10,y-31,ratio);}
   ctx.restore();
 }
 function catSpriteFilter(skin){
@@ -771,16 +789,40 @@ function catSpriteFilter(skin){
   };
   return filters[skin.id]||'none';
 }
+const RUN_BASELINES=[357,354,355,270,270,255];
+const RUN_X_OFFSETS=[1,-6,9,-1,-5,3];
+const RUN_EYE_ANCHORS=[[34,-52],[31,-53],[43,-54],[35,-49],[31,-48],[43,-38]];
+function runFrameState(){
+  if(!cat.onGround){
+    if(cat.launchTime>.065) return 1;
+    if(cat.launchTime>0) return 5;
+    return -1;
+  }
+  if(cat.landTime>.075) return 4;
+  return Math.floor(cat.frame)%6;
+}
+function drawRunCycleFrame(frame){
+  const image=art.catRunCycle, cellW=image.naturalWidth/3, cellH=image.naturalHeight/2;
+  const sx=(frame%3)*cellW, sy=Math.floor(frame/3)*cellH, size=128, scale=size/384;
+  ctx.drawImage(image,sx,sy,cellW,cellH,-64+RUN_X_OFFSETS[frame],-RUN_BASELINES[frame]*scale,size,size);
+}
 function drawCat(x,y,t,smoking=false){
   if(!art.cat.complete||!art.cat.naturalWidth){drawCatProcedural(x,y,t,smoking);return;}
   const skin=cosmeticItem(save.cosmetics.equipped.skin)||COSMETICS.skins[0]; const glasses=cosmeticItem(save.cosmetics.equipped.glasses)?.style||'none'; const hat=cosmeticItem(save.cosmetics.equipped.hat)?.style||'none';
-  const blink=game.inv>0&&Math.floor(game.inv*16)%2===0; const runPhase=cat.onGround&&game.state==='run'?Math.sin(cat.frame*Math.PI):0; const airborne=!cat.onGround; const bob=cat.onGround&&game.state==='run'?Math.abs(runPhase)*2:0;
-  const sprite=smoking?art.cat:airborne&&art.catJump.complete?art.catJump:game.state==='run'&&art.catRun.complete&&Math.abs(runPhase)>.32?art.catRun:art.cat;
+  const blink=game.inv>0&&Math.floor(game.inv*16)%2===0, airborne=!cat.onGround;
+  const canCycle=game.state==='run'&&art.catRunCycle.complete&&art.catRunCycle.naturalWidth;
+  const frame=canCycle?runFrameState():-1, usingCycle=frame>=0;
   ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.fillStyle='#05060a';ctx.globalAlpha*=.34;ctx.beginPath();ctx.ellipse(x+1,groundY+5,38,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
   const baseFilter=catSpriteFilter(skin),spriteFilter=game.ghostTime>0?(baseFilter==='none'?'drop-shadow(0 0 7px #80e1c1)':baseFilter+' drop-shadow(0 0 7px #80e1c1)'):baseFilter;
-  ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.translate(x,y+15-bob);ctx.rotate(airborne?-.09:runPhase*.018);ctx.scale(1+Math.abs(runPhase)*.025,1-Math.abs(runPhase)*.025);ctx.filter=spriteFilter;ctx.imageSmoothingEnabled=true;ctx.drawImage(sprite,-56,-79,112,79);ctx.filter='none';ctx.restore();
-  drawGlasses(glasses,x+27,y-31-bob);drawHat(hat,x+21,y-54-bob,t);
-  if(smoking){const ratio=game.cigMax?game.cigHp/game.cigMax:1;drawSmokeHeld(game.smokeable,x+57,y-26-bob,ratio);}
+  const recoil=cat.landTime>0?cat.landTime/.14:0, launch=cat.launchTime>0?cat.launchTime/.12:0;
+  const squash=Math.max(recoil,launch), footY=y+26;
+  ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.translate(x,footY);ctx.rotate(airborne&&!usingCycle?Math.max(-.11,Math.min(.08,cat.vy/4300)):0);ctx.scale(1+squash*.055,1-squash*.075);ctx.filter=spriteFilter;ctx.imageSmoothingEnabled=true;
+  if(usingCycle) drawRunCycleFrame(frame);
+  else { const sprite=airborne&&art.catJump.complete?art.catJump:art.cat; ctx.drawImage(sprite,-56,-75,112,75); }
+  ctx.filter='none';ctx.restore();
+  if(usingCycle){ const eye=RUN_EYE_ANCHORS[frame]; drawGlasses(glasses,x+eye[0],footY+eye[1]);drawHat(hat,x+eye[0]-6,footY+eye[1]-23,t); }
+  else { drawGlasses(glasses,x+27,y-31);drawHat(hat,x+21,y-54,t); }
+  if(smoking){const ratio=game.cigMax?game.cigHp/game.cigMax:1;drawSmokeHeld(game.smokeable,x+43,y-7,ratio);}
 }
 function drawObstacle(o){ ctx.save(); if(o.type==='can'){ roundRect(o.x,o.y,o.w,o.h,5,'#171820'); ctx.fillStyle='#6e7584'; ctx.fillRect(o.x+3,o.y+5,o.w-6,o.h-5); ctx.fillStyle='#aeb3bd'; ctx.fillRect(o.x,o.y+2,o.w,5); ctx.fillStyle='#252833'; ctx.fillRect(o.x+8,o.y+12,4,18); }
   else if(o.type==='cone'){ ctx.fillStyle='#f47a42'; ctx.beginPath(); ctx.moveTo(o.x+16,o.y); ctx.lineTo(o.x+30,o.y+o.h); ctx.lineTo(o.x+2,o.y+o.h); ctx.closePath(); ctx.fill(); ctx.fillStyle='#f5e7c6'; ctx.fillRect(o.x+7,o.y+16,18,5); ctx.fillStyle='#15161d'; ctx.fillRect(o.x,o.y+o.h-4,32,6); }
@@ -824,11 +866,9 @@ function drawGroundSmoke(smoke,x,y){
   ctx.save(); ctx.globalAlpha=.24; ctx.fillStyle=smoke?.boss?'#b388ff':'#ffd166'; ctx.beginPath();ctx.ellipse(x,y+9,40,9,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1; drawSmokeableDevice(smoke,x,y-2,1,smoke?.boss ? .55 : .7); ctx.restore();
 }
 function drawEncounter(t){
-  const x=Math.min(W*.72,cat.x+Math.max(150,W*.34)); const y=groundY-27; const smoke=displaySmoke(game.smokeable||SMOKES[0]);
-  ctx.globalAlpha=.16;ctx.fillStyle=smoke.boss?'#b388ff':'#ffd166';ctx.beginPath();ctx.ellipse(x,y+19,64,16,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
-  ctx.fillStyle='#1b1c24';ctx.fillRect(x-42,y+22,84,7);ctx.fillStyle='#777b86';ctx.fillRect(x-38,y+18,76,7);ctx.fillStyle='#444650';ctx.fillRect(x-29,y+13,58,7);
-  drawSmokeableDevice(smoke,x,y-16,game.cigMax?game.cigHp/game.cigMax:1,smoke.boss?1:.9);
-  if(H>=420){ ctx.fillStyle='#f7f0dc';ctx.font='700 11px ui-monospace,monospace';ctx.textAlign='center';ctx.fillText(smoke.boss?`${isCandyMode()?'BOSS TREAT':'BOSS DEVICE'} · PHASE ${game.bossPhase+1}`:(isCandyMode()?'STREET TREAT':'SMOKEABLE'),x,y-72);ctx.textAlign='left'; }
+  const smoke=displaySmoke(game.smokeable||SMOKES[0]), mouth=catMouthSocket();
+  ctx.save();ctx.globalAlpha=.11+.025*Math.sin(t*7);ctx.fillStyle=smoke.boss?'#b388ff':'#ffd166';ctx.beginPath();ctx.arc(mouth.x+14,mouth.y,smoke.boss?38:27,0,Math.PI*2);ctx.fill();ctx.restore();
+  if(H>=420){ ctx.fillStyle='#f7f0dc';ctx.font='700 11px ui-monospace,monospace';ctx.textAlign='center';ctx.fillText(smoke.boss?`${isCandyMode()?'BOSS TREAT':'BOSS DEVICE'} · PHASE ${game.bossPhase+1}`:(isCandyMode()?'STREET TREAT':'SMOKEABLE'),mouth.x+15,mouth.y-55);ctx.textAlign='left'; }
 }
 function render(tms){
   const t=tms/1000; ctx.save(); if(game.shake){ ctx.translate((Math.random()-.5)*game.shake,(Math.random()-.5)*game.shake); }

@@ -12,6 +12,8 @@ requireMatch(/<!doctype html>/i, 'index.html must declare an HTML5 doctype');
 requireMatch(/<canvas\s+id="game"/, 'index.html must include the game canvas');
 requireMatch(/<link\s+rel="manifest"/, 'index.html must link the web manifest');
 requireMatch(/smoke-mode/, 'compact smoke-mode layout hooks must remain present');
+requireMatch(/street-cat-run-cycle-v2\.png/, 'runtime must load the six-frame run-cycle atlas');
+if (/street-cat-run-v1\.png/.test(html)) failures.push('runtime must not fall back to the superseded binary gallop pose');
 
 if (/user-scalable\s*=\s*no/i.test(html)) {
   failures.push('viewport metadata must not disable user zoom');
@@ -37,21 +39,25 @@ for (const [index, block] of scriptBlocks.entries()) {
   }
 }
 
-const characterAssets = ['base', 'run', 'jump'];
-for (const pose of characterAssets) {
-  const path = new URL(`../public/assets/characters/street-cat-${pose}-v1.png`, import.meta.url);
+const characterAssets = [
+  {name:'base',file:'street-cat-base-v1.png',width:768,height:512,budget:600_000},
+  {name:'jump',file:'street-cat-jump-v1.png',width:768,height:512,budget:600_000},
+  {name:'run cycle',file:'street-cat-run-cycle-v2.png',width:1152,height:768,budget:800_000},
+];
+for (const asset of characterAssets) {
+  const path = new URL(`../public/assets/characters/${asset.file}`, import.meta.url);
   try {
     const png = await readFile(path);
     const isPng = png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
-    if (!isPng) failures.push(`${pose} character asset must be a PNG`);
-    if (png.length > 600_000) failures.push(`${pose} character asset exceeds the 600 KB budget`);
+    if (!isPng) failures.push(`${asset.name} character asset must be a PNG`);
+    if (png.length > asset.budget) failures.push(`${asset.name} character asset exceeds the ${Math.round(asset.budget/1000)} KB budget`);
     if (png.length >= 26) {
       const width = png.readUInt32BE(16), height = png.readUInt32BE(20), colorType = png[25];
-      if (width !== 768 || height !== 512) failures.push(`${pose} character asset must be 768×512`);
-      if (![4, 6].includes(colorType)) failures.push(`${pose} character asset must preserve alpha transparency`);
+      if (width !== asset.width || height !== asset.height) failures.push(`${asset.name} character asset must be ${asset.width}×${asset.height}`);
+      if (![4, 6].includes(colorType)) failures.push(`${asset.name} character asset must preserve alpha transparency`);
     }
   } catch (error) {
-    failures.push(`missing ${pose} character asset: ${error.message}`);
+    failures.push(`missing ${asset.name} character asset: ${error.message}`);
   }
 }
 
