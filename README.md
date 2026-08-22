@@ -18,6 +18,8 @@ The current public goal is fast playtesting through GitHub Pages while keeping t
   - **Original Mode:** the intended cigarettes, vapes, smoke devices, names, and jokes.
   - **Little Baby Idiot Mode:** an optional candy-themed content skin for players who want it.
 
+Switch modes from the title screen or the Cat Closet. The preference persists on the device and can be changed during a run without resetting progress.
+
 The alternate content mode is a presentation feature, not a claim of compliance with any mobile-store policy. See [`docs/PRODUCT_DECISIONS.md`](docs/PRODUCT_DECISIONS.md).
 
 ## Local development
