@@ -27,7 +27,7 @@ The cat is ugly-cute by design. Awkwardness is allowed when it makes the express
 - Use authored idle, run, airborne, and puff poses. A pose must change limb placement and weight, not merely rotate the whole mascot.
 - Keep the body upright and chibi. Literal neck, throat, quadruped spine, feline ribcage, haunch, and panther anatomy are rejected.
 - During a smoke pose, the lifted near arm replaces its normal run/idle arm. The cat must always have exactly two arms and two legs.
-- The run uses six authored biped keys: opposing contact, compression, passing, and flight. Arms are contralateral—each arm opposes its same-side leg and the two hands never pump in the same direction. Smooth interpolation connects strong silhouettes; it must not disguise weak poses. Far limbs recede but remain readable.
+- The run uses six authored biped keys: opposing contact, compression, passing, and flight. The visible/front-layer arm roots on the rear side of the chest; the rear-layer arm roots toward the torso front, preserving the right-facing three-quarter twist. Arms are contralateral—each arm opposes its same-side leg and the two hands never pump in the same direction. Smooth interpolation connects strong silhouettes; it must not disguise weak poses. Far limbs recede but remain readable.
 - Every wardrobe card must show a code-drawn thumbnail so the visual reward is legible before it is unlocked or equipped.
 - A hover/focus preview always starts from the equipped loadout, swaps only the focused category, and resets on exit. Previewing several cards must never accumulate a phantom mixed loadout.
 - Original and Little Baby Idiot props share timing, sockets, scale, and gameplay rules.
