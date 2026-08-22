@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Content modes change names, descriptions, sprites, encounter artwork, particles, sound flavor, and jokes. They must never change hit points, timing, rewards, rarity, collision boxes, progression, achievements, save economy, or input behavior.
+Content modes change names, descriptions, code-drawn encounter shapes, particles, sound flavor, and jokes. They must never change hit points, timing, rewards, rarity, collision boxes, progression, achievements, save economy, or input behavior.
 
 ## Modes
 
