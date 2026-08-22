@@ -41,7 +41,7 @@ if (!/export const CAT_RUN_KEY_COUNT=RUN_POSES\.length/.test(codeArt)) failures.
 if (!codeArt.startsWith('// GREMLIN ZINE renderer:')) failures.push('the rejected transitional mascot renderer must not return');
 if (!/GREMLIN ZINE: raw screen-print UI/.test(html)) failures.push('the game shell must retain the approved punk-editorial vector language');
 if (!/original urban chibi biped/.test(codeArt)) failures.push('the mascot must retain the approved upright urban-chibi construction');
-if (!/if\(!smoking\)drawArm\(p,pose\.arms\[1\]/.test(codeArt) || !/if\(smoking\)drawArm\(p,\[15,-29,30,-33,25\+recoil,-43\]/.test(codeArt)) failures.push('the smoking arm must replace the normal near-arm swing instead of creating a fifth limb');
+if (!/if\(!smoking\)drawArm\(p,pose\.arms\[1\]/.test(codeArt) || !/if\(smoking\)drawArm\(p,\[-12,-29,5,-33,25\+recoil,-43\]/.test(codeArt)) failures.push('the smoking arm must replace the normal near-arm swing instead of creating a fifth limb');
 if (/skin_bone:/.test(html)) failures.push('obsolete skin_bone renderer key must not return');
 if (/function catSpriteFilter\(/.test(html)) failures.push('whole-image cosmetic filters must not return');
 if (/skin-palette\.js|street-cat-[^'"\s]+\.png|cosmetics-(?:glasses|hats)-v1\.png|hazards-(?:ground|flying)-v1\.png|smokeables-(?:original|candy)-v1\.png/.test(html)) failures.push('runtime must not reference rejected generated raster art');

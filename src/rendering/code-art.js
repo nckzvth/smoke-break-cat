@@ -8,16 +8,16 @@ function blob(p,draw,fill,stroke=INK,lw=4){p.beginPath();draw();p.closePath();p.
 
 // Two legs and two arms in every key. Coordinates are shoulder/hip, joint, hand/foot.
 const RUN_POSES=[
- {y:0,tilt:-.04,headX:1,headY:0,legs:[[-8,-10,-17,1,-25,16],[8,-10,18,2,28,15]],arms:[[-15,-29,-5,-22,5,-18],[15,-29,5,-18,-5,-7]]},
- {y:3,tilt:.018,headX:-1,headY:1,legs:[[-8,-10,-13,5,-13,16],[8,-10,14,5,18,16]],arms:[[-15,-29,-7,-21,1,-17],[15,-29,7,-18,0,-8]]},
- {y:0,tilt:-.025,headX:1,headY:0,legs:[[-8,-10,4,-3,16,7],[8,-10,-2,3,-16,15]],arms:[[-15,-29,-24,-17,-28,-7],[15,-29,24,-22,30,-18]]},
- {y:-5,tilt:-.055,headX:2,headY:-1,legs:[[-8,-10,12,-4,23,7],[8,-10,-8,-3,-20,7]],arms:[[-15,-29,-27,-18,-32,-8],[15,-29,28,-23,34,-19]]},
- {y:0,tilt:-.04,headX:1,headY:0,legs:[[-8,-10,17,1,27,15],[8,-10,-17,2,-26,16]],arms:[[-15,-29,-26,-17,-30,-7],[15,-29,26,-22,32,-18]]},
- {y:3,tilt:.018,headX:-1,headY:1,legs:[[-8,-10,13,5,17,16],[8,-10,-13,5,-14,16]],arms:[[-15,-29,-21,-18,-24,-9],[15,-29,23,-21,27,-17]]}
+ {y:0,tilt:-.04,headX:1,headY:0,legs:[[-8,-10,-17,1,-25,16],[8,-10,18,2,28,15]],arms:[[12,-29,22,-23,30,-18],[-12,-29,-22,-18,-29,-7]]},
+ {y:3,tilt:.018,headX:-1,headY:1,legs:[[-8,-10,-13,5,-13,16],[8,-10,14,5,18,16]],arms:[[12,-29,19,-22,24,-17],[-12,-29,-18,-18,-23,-8]]},
+ {y:0,tilt:-.025,headX:1,headY:0,legs:[[-8,-10,4,-3,16,7],[8,-10,-2,3,-16,15]],arms:[[12,-29,2,-17,-6,-7],[-12,-29,2,-23,12,-18]]},
+ {y:-5,tilt:-.055,headX:2,headY:-1,legs:[[-8,-10,12,-4,23,7],[8,-10,-8,-3,-20,7]],arms:[[12,-29,0,-18,-10,-8],[-12,-29,4,-24,16,-19]]},
+ {y:0,tilt:-.04,headX:1,headY:0,legs:[[-8,-10,17,1,27,15],[8,-10,-17,2,-26,16]],arms:[[12,-29,1,-17,-8,-7],[-12,-29,3,-23,14,-18]]},
+ {y:3,tilt:.018,headX:-1,headY:1,legs:[[-8,-10,13,5,17,16],[8,-10,-13,5,-14,16]],arms:[[12,-29,3,-19,-3,-9],[-12,-29,1,-22,10,-17]]}
 ];
 export const CAT_RUN_KEY_COUNT=RUN_POSES.length;
-const IDLE={y:0,tilt:0,headX:0,headY:0,legs:[[-8,-10,-11,4,-12,16],[8,-10,11,4,12,16]],arms:[[-15,-29,-21,-17,-18,-6],[15,-29,22,-17,19,-6]]};
-const JUMP={y:-5,tilt:-.05,headX:2,headY:-1,legs:[[-8,-10,-18,-1,-12,7],[8,-10,18,-2,13,7]],arms:[[-15,-29,-27,-17,-22,-5],[15,-29,29,-18,28,-6]]};
+const IDLE={y:0,tilt:0,headX:0,headY:0,legs:[[-8,-10,-11,4,-12,16],[8,-10,11,4,12,16]],arms:[[12,-29,20,-18,22,-6],[-12,-29,-20,-17,-18,-6]]};
+const JUMP={y:-5,tilt:-.05,headX:2,headY:-1,legs:[[-8,-10,-18,-1,-12,7],[8,-10,18,-2,13,7]],arms:[[12,-29,24,-18,26,-6],[-12,-29,-24,-17,-22,-5]]};
 
 function poseFor(name,cycle,puff,t){
  if(name==='run'){
@@ -142,7 +142,7 @@ export function drawCodeHat(p,style,x,y,t=0){
 
 export function drawCodeCat(p,x,y,t,options={}){const skin=options.skin||{body:'#d66e57',head:'#e47c61',inner:'#ec927f',pattern:'plain'},air=!!options.airborne,puff=Math.max(0,options.puff||0),poseName=options.pose||(puff?'puff':air?'jump':options.run!==undefined?'run':'idle'),cycle=options.run||t*.7,pose=poseFor(poseName,cycle,puff,t),fur=options.ghost?'#8ea6ef':skin.head,smoking=!!options.smoking||poseName==='puff';
  p.save();p.globalAlpha=options.alpha??1;p.translate(x,y+pose.y);p.scale(options.scale||1,options.scale||1);p.rotate((pose.tilt||0)+(options.sprint?-.035:0)+(poseName==='jump'?(options.airTilt||0):0));p.lineCap='round';p.lineJoin='round';if(options.shadow!==false){p.save();p.globalAlpha*=.24;ellipse(p,0,20,poseName==='jump'?21:28,poseName==='jump'?3:5,INK,null,0);p.restore();}if(skin.pattern==='ghost'){p.globalAlpha*=.84;p.shadowBlur=11;p.shadowColor=MINT;}
- drawTail(p,fur,t,poseName);drawLeg(p,pose.legs[0],fur,true);drawArm(p,pose.arms[0],fur,true);drawLeg(p,pose.legs[1],fur,false);drawJacket(p);if(!smoking)drawArm(p,pose.arms[1],fur,false);const recoil=drawHead(p,fur,skin,t,puff,options,pose.headX,pose.headY);if(smoking)drawArm(p,[15,-29,30,-33,25+recoil,-43],fur,false);p.restore();
+ drawTail(p,fur,t,poseName);drawLeg(p,pose.legs[0],fur,true);drawArm(p,pose.arms[0],fur,true);drawLeg(p,pose.legs[1],fur,false);drawJacket(p);if(!smoking)drawArm(p,pose.arms[1],fur,false);const recoil=drawHead(p,fur,skin,t,puff,options,pose.headX,pose.headY);if(smoking)drawArm(p,[-12,-29,5,-33,25+recoil,-43],fur,false);p.restore();
 }
 
 export function drawCosmeticThumbnail(canvas,t,loadout){const p=canvas.getContext('2d'),w=canvas.width,h=canvas.height,scale=Math.min(w/112,h/110);p.clearRect(0,0,w,h);p.fillStyle='#1a1818';p.fillRect(0,0,w,h);p.save();p.translate(w*.5,h*.84);p.scale(scale,scale);drawCodeCat(p,0,0,t,{...loadout,pose:'idle',shadow:true});p.restore();}

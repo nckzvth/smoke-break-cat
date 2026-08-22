@@ -46,6 +46,8 @@ test('exports one reusable code-native mascot system', () => {
 test('runs with contralateral arm and leg phases', () => {
   for (let key=0; key<CAT_RUN_KEY_COUNT; key++) {
     const pose=sampleCodeCatRunPose(key);
+    assert.ok(pose.arms[0][0]>0,'rear-layer arm must root toward the front of the torso');
+    assert.ok(pose.arms[1][0]<0,'front-layer arm must root toward the back of the torso');
     const farArm=pose.arms[0][4]-pose.arms[0][0];
     const nearArm=pose.arms[1][4]-pose.arms[1][0];
     const farLeg=pose.legs[0][4]-pose.legs[0][0];
