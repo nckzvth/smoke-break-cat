@@ -48,6 +48,7 @@ This board is a concept anchor, not a sprite atlas. Runtime poses are generated 
 | `public/assets/characters/street-cat-run-v1.png` | Identity-preserving generation from the neutral pose plus alpha extraction; optimized project copy | Legacy single gallop pose; superseded at runtime | `4556d8c13225d2afe0be1396388e46d53548814670dcd8918a926ab8583313d9` |
 | `public/assets/characters/street-cat-jump-v1.png` | Identity-preserving generation from the neutral pose plus alpha extraction; optimized project copy | Shipped jump pose | `9b5f5d6ac68295c91afe76d0c4ab9cb8066f126b4d2541fb04a8c31d6f2d0759` |
 | `public/assets/characters/street-cat-run-cycle-v2.png` | Identity-preserving six-frame generation from the neutral pose; deterministic checkerboard-to-alpha cleanup; optimized project copy | Shipped 3×2 run-cycle atlas | `03a6b4cb7550603b5f5df74fef4b2c437ecbcc57cd08ee577d675be2f6b6478c` |
+| `public/assets/characters/street-cat-puff-cycle-v1.png` | Identity-preserving four-frame generation from the neutral pose; deterministic checkerboard-to-alpha cleanup; optimized project copy | Shipped 2×2 encounter-action atlas | `ed5659188f80eba76cf1aedbedb9730e79c9ad77232cc0240900bec704021144` |
 
 Final generation prompt:
 
@@ -73,6 +74,10 @@ Run-cycle atlas:
 
 > Create exactly six sequential side-view running animation frames of the neutral cat, facing right, in a strict 3-column by 2-row grid: left contact, recoil/compression, passing, right contact, opposite recoil/compression, and airborne extension returning to frame one. Preserve head shape, taped nicked ears, eyes, muzzle, paws, bandana, markings, outline, shading, texture, scale, and camera angle. Keep one full cat per cell, a shared ground-contact baseline, stable torso/head travel, generous padding, and no overlaps, labels, props, effects, floor, shadow, background, or redesign.
 
+Encounter-action atlas:
+
+> Create exactly four sequential side-view encounter-action frames of the neutral cat in a strict 2-column by 2-row grid: tense ready, anticipation leaning into a drag or bite, strong pull/bite recoil, and recovery/exhale. Preserve the complete character identity, body volume, scale, camera angle, line weight, color, and texture. Keep the mouth corner as the animation pivot for a separate runtime prop, keep contact paws on a shared ground line, and include no prop, smoke, confetti, effect, floor, shadow, labels, or background.
+
 The original individual poses required targeted background extraction because their first versions used baked checkerboards. The run-cycle generator also baked its checkerboard into the PNG; two constrained extraction edits still returned RGB files, so the shipped atlas uses a deterministic neutral-checkerboard-to-alpha conversion with softened antialiased edge pixels. The full-resolution generated originals remain unmodified outside the project copy.
 
 ## Runtime implementation
@@ -80,6 +85,8 @@ The original individual poses required targeted background extraction because th
 - The title screen now presents the actual character art.
 - Ground movement advances through six authored frames at a speed-limited 10–13 fps. Each frame uses a measured paw baseline and horizontal compensation so the body changes pose without skating on the road.
 - Jumping stages compression and extension frames before the dedicated airborne pose, rotates subtly with vertical velocity, and returns through a timed landing recoil with a small dust burst.
-- Encounters use the neutral pose with a single separate Original/Candy prop layer attached to a measured mouth socket. Stick props flip toward the facing direction; devices use per-visual mouthpiece, hose, straw, or serving-edge sockets. The former duplicate pedestal prop is not rendered during encounters.
+- Encounters advance through ready, anticipation, pull/bite recoil, and recovery frames on a 340 ms input cadence. Rapid hold input restarts only after the impact phase so it cannot trap the cat on one pose.
+- The single separate Original/Candy prop layer follows per-frame measured mouth sockets through the same foot-pivot scale and rotation matrix. Stick props flip toward the facing direction; devices use per-visual mouthpiece, hose, straw, or serving-edge sockets. The former duplicate pedestal prop is not rendered during encounters.
+- Original puff VFX use thin inked curls, partial arcs, and small translucent cores. Candy mode emits outlined directional sprinkles; neither effect obscures the character action.
 - The city renderer now uses inked building silhouettes, brick lines, neon windows, fire escapes, cables, road cracks, moon glow, sprint streaks, and a screen vignette.
 - Hats and glasses remain separate canvas layers. Skin palette filters are provisional until dedicated color masks or layered sprites replace them.

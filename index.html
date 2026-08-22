@@ -235,10 +235,11 @@ import { CONTENT_MODE, assertCompleteCandyRegistry, normalizeContentMode, presen
 'use strict';
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const art={cat:new Image(),catRunCycle:new Image(),catJump:new Image()};
+const art={cat:new Image(),catRunCycle:new Image(),catPuffCycle:new Image(),catJump:new Image()};
 for(const image of Object.values(art)) image.decoding='async';
 art.cat.src='./assets/characters/street-cat-base-v1.png';
 art.catRunCycle.src='./assets/characters/street-cat-run-cycle-v2.png';
+art.catPuffCycle.src='./assets/characters/street-cat-puff-cycle-v1.png';
 art.catJump.src='./assets/characters/street-cat-jump-v1.png';
 const $ = id => document.getElementById(id);
 const ui = {
@@ -466,7 +467,7 @@ function renderWardrobe(){
 function activateCosmetic(item){ const cat=cosmeticCategory(item.id); if(ownsCosmetic(item.id)){ save.cosmetics.equipped[cat]=item.id; saveNow(); sfx('equip'); renderWardrobe(); toast('EQUIPPED '+modeCopy(item.name)); return; } const src=item.source||{}; if(src.type==='pack'){ if(save.packs>=src.cost){ save.packs-=src.cost; unlockCosmetic(item,'PACK PURCHASE'); save.cosmetics.equipped[cat]=item.id; saveNow(); renderWardrobe(); updateHud(); } else { sfx('deny'); toast('NOT ENOUGH PACKS'); } } else { sfx('deny'); toast(modeCopy(src.label||'LOCKED')); } }
 
 const game={state:'title',paused:false,distance:0,baseSpeed:250,speed:250,worldX:0,hearts:3,maxHearts:3,nextSmoke:100,nextObstacle:45,nextFlying:80,nextBox:60,inv:0,runTime:0,combo:1,comboTimer:0,lastPuff:0,shake:0,encounters:0,bossPhase:0,smokeable:null,nextSmokeable:null,cigHp:0,cigMax:0,ashMult:1,ghostTime:0,speedBoostTime:0,psyTime:0,tmpHeartCap:0,sprintHeld:false,sprintEnergy:1,sprintActive:false,nearMisses:0};
-cat={x:W*0.25,y:0,vy:0,onGround:true,frame:0,launchTime:0,landTime:0};
+cat={x:W*0.25,y:0,vy:0,onGround:true,frame:0,launchTime:0,landTime:0,puffTime:0};
 let obstacles=[],flyers=[],boxes=[],particles=[],smokePuffs=[],stars=[];
 for(let i=0;i<85;i++) stars.push({x:Math.random()*2400,y:Math.random()*.55,sz:1+Math.random()*2,tw:Math.random()*6.28});
 
@@ -484,7 +485,7 @@ function weightedSmoke(encounterNo=game.encounters+1){
 }
 function resetRun(){
   game.state='run'; game.paused=false; game.distance=0; game.baseSpeed=250; game.speed=250; game.worldX=0; game.maxHearts=baseMaxHearts(); game.hearts=game.maxHearts; game.nextSmoke=110+Math.random()*40; game.nextObstacle=35; game.nextFlying=65; game.nextBox=55; game.inv=0; game.runTime=0; game.combo=1; game.comboTimer=0; game.lastPuff=0; game.shake=0; game.encounters=0; game.bossPhase=0; game.smokeable=null; game.nextSmokeable=weightedSmoke(1); game.cigHp=0; game.cigMax=0; game.ashMult=1; game.ghostTime=0; game.speedBoostTime=0; game.psyTime=0; game.tmpHeartCap=0; game.sprintHeld=false; game.sprintEnergy=1; game.sprintActive=false; game.nearMisses=0;
-  obstacles=[]; flyers=[]; boxes=[]; particles=[]; smokePuffs=[]; cat.y=groundY-26; cat.vy=0; cat.onGround=true; cat.frame=0; cat.launchTime=0; cat.landTime=0; ui.gameOver.style.display='none'; setAction('run'); updateHud(); save.runs=(save.runs||0)+1; saveNow();
+  obstacles=[]; flyers=[]; boxes=[]; particles=[]; smokePuffs=[]; cat.y=groundY-26; cat.vy=0; cat.onGround=true; cat.frame=0; cat.launchTime=0; cat.landTime=0; cat.puffTime=0; ui.gameOver.style.display='none'; setAction('run'); updateHud(); save.runs=(save.runs||0)+1; saveNow();
 }
 function setAction(state){
   if(state!=='smoke' && typeof stopPuffHold==='function') stopPuffHold();
@@ -502,7 +503,7 @@ function setSprint(on){
 }
 function jump(){ if(game.state!=='run'||game.paused) return; if(cat.onGround){ cat.vy=-560; cat.onGround=false; cat.launchTime=.12; cat.landTime=0; sfx('jump'); burst(cat.x,groundY-4,'dust',7); } }
 function beginSmoke(){
-  game.state='smoke'; cat.y=groundY-26; cat.vy=0; cat.onGround=true; cat.launchTime=0; cat.landTime=0; setAction('smoke'); game.encounters++; game.smokeable=game.nextSmokeable || weightedSmoke(game.encounters); game.nextSmokeable=null; game.bossPhase=0;
+  game.state='smoke'; cat.y=groundY-26; cat.vy=0; cat.onGround=true; cat.launchTime=0; cat.landTime=0; cat.puffTime=0; setAction('smoke'); game.encounters++; game.smokeable=game.nextSmokeable || weightedSmoke(game.encounters); game.nextSmokeable=null; game.bossPhase=0;
   const hpBase=85 + game.encounters*17 + Math.min(130,game.distance*.026);
   game.cigMax=hpBase*game.smokeable.hp*(game.smokeable.boss?1.15:1);
   const hot=Math.min(.3,save.up.hotStart*.06); game.cigHp=game.cigMax*(1-hot); game.combo=1; game.comboTimer=0;
@@ -528,6 +529,7 @@ function puff(manual=true){
   if(game.state!=='smoke'||game.paused||game.cigHp<=0) return;
   let dmg=manual?tapPower():0; let crit=false;
   if(manual){ const now=performance.now(); if(now-game.lastPuff<390 && save.up.combo>0){ game.combo=Math.min(1+save.up.combo*.18,game.combo+.07+save.up.combo*.008); } else game.combo=Math.max(1,game.combo*.72); game.lastPuff=now; game.comboTimer=.72; if(Math.random()<save.up.crit*.045){ dmg*=3; crit=true; } dmg*=game.combo; }
+  if(manual&&cat.puffTime<.13) cat.puffTime=.34;
   if(game.smokeable && game.smokeable.boss){ if(game.bossPhase===1) dmg*=1.08; if(game.bossPhase===2) dmg*=1.18; }
   game.cigHp=Math.max(0,game.cigHp-dmg); smokeBurst(crit?12:6); sfx(crit?'crit':puffSoundKind()); if(crit) toast(isCandyMode()?'CRIT BITE':'CRIT PUFF'); smokePhaseCheck(); updateSmokeUI(); if(game.cigHp<=0) finishSmoke();
 }
@@ -594,8 +596,11 @@ function spawnBox(){
   boxes.push({x:W+70,y,w:36,h,hit:false,reward:chooseBoxReward(),bob:Math.random()*6.28});
 }
 function burst(x,y,type,n){ for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*190,vy:-Math.random()*180-20,life:.35+Math.random()*.4,t:0,type,s:2+Math.random()*5}); }
-function catMouthSocket(){ return {x:cat.x+43,y:cat.y-7}; }
-function smokeBurst(n){ const mouth=catMouthSocket(); for(let i=0;i<n;i++) smokePuffs.push({x:mouth.x+8+Math.random()*6,y:mouth.y-2+Math.random()*4,vx:28+Math.random()*28,vy:-25-Math.random()*34,life:.8+Math.random()*.7,t:0,s:4+Math.random()*9}); }
+function catMouthSocket(){
+  if(game.state==='smoke'&&art.catPuffCycle.complete&&art.catPuffCycle.naturalWidth){ const frame=encounterFrameState(),mouth=transformEncounterOffset(frame,encounterMouthOffset(frame)); return {x:cat.x+mouth.x,y:cat.y+26+mouth.y}; }
+  return {x:cat.x+43,y:cat.y-7};
+}
+function smokeBurst(n){ const mouth=catMouthSocket(); for(let i=0;i<n;i++) smokePuffs.push({x:mouth.x+8+Math.random()*6,y:mouth.y-2+Math.random()*4,vx:28+Math.random()*28,vy:-25-Math.random()*34,life:.8+Math.random()*.7,t:0,s:3+Math.random()*7,rot:Math.random()*Math.PI*2,spin:(Math.random()-.5)*3,curl:.7+Math.random()*.8,hue:Math.random()*360}); }
 
 function update(dt){
   if(game.paused||game.state==='title'||game.state==='dead') return;
@@ -642,6 +647,7 @@ function update(dt){
     }
     obstacles=obstacles.filter(o=>o.x>-120); flyers=flyers.filter(f=>f.x>-120); boxes=boxes.filter(b=>b.x>-120 && !b.hit);
   } else if(game.state==='smoke'){
+    cat.puffTime=Math.max(0,cat.puffTime-dt);
     const dps=passiveDps(); if(dps>0 && game.cigHp>0){ let burn=dps*dt; if(game.smokeable && game.smokeable.boss && game.bossPhase===2) burn*=1.15; game.cigHp=Math.max(0,game.cigHp-burn); if(Math.random()<dt*dps*.24) smokeBurst(1); smokePhaseCheck(); if(game.cigHp<=0) finishSmoke(); }
     updateSmokeUI(); cat.frame+=dt*3;
   }
@@ -792,6 +798,11 @@ function catSpriteFilter(skin){
 const RUN_BASELINES=[357,354,355,270,270,255];
 const RUN_X_OFFSETS=[1,-6,9,-1,-5,3];
 const RUN_EYE_ANCHORS=[[34,-52],[31,-53],[43,-54],[35,-49],[31,-48],[43,-38]];
+const PUFF_BASELINES=[466,466,387,387];
+const PUFF_X_OFFSETS=[-2,2,1,0];
+const PUFF_MOUTHS=[[468,328],[458,358],[459,292],[467,252]];
+const PUFF_EYE_ANCHORS=[[34,-46],[36,-36],[34,-35],[34,-43]];
+const PUFF_TRANSFORMS=[{sx:1,sy:1,r:0},{sx:1.025,sy:.975,r:.012},{sx:.965,sy:1.035,r:-.035},{sx:1.012,sy:.988,r:.01}];
 function runFrameState(){
   if(!cat.onGround){
     if(cat.launchTime>.065) return 1;
@@ -806,23 +817,46 @@ function drawRunCycleFrame(frame){
   const sx=(frame%3)*cellW, sy=Math.floor(frame/3)*cellH, size=128, scale=size/384;
   ctx.drawImage(image,sx,sy,cellW,cellH,-64+RUN_X_OFFSETS[frame],-RUN_BASELINES[frame]*scale,size,size);
 }
+function encounterFrameState(){
+  if(cat.puffTime<=0) return 0;
+  if(cat.puffTime>.25) return 1;
+  if(cat.puffTime>.13) return 2;
+  return 3;
+}
+function encounterMouthOffset(frame){
+  const size=118,scale=size/512,dx=-size/2+PUFF_X_OFFSETS[frame],dy=-PUFF_BASELINES[frame]*scale,mouth=PUFF_MOUTHS[frame];
+  return {x:dx+mouth[0]*scale,y:dy+mouth[1]*scale};
+}
+function transformEncounterOffset(frame,point){
+  const pose=PUFF_TRANSFORMS[frame],px=point.x*pose.sx,py=point.y*pose.sy,c=Math.cos(pose.r),s=Math.sin(pose.r);
+  return {x:px*c-py*s,y:px*s+py*c};
+}
+function drawPuffCycleFrame(frame){
+  const image=art.catPuffCycle,cellW=image.naturalWidth/2,cellH=image.naturalHeight/2,size=118,scale=size/512;
+  const sx=(frame%2)*cellW,sy=Math.floor(frame/2)*cellH;
+  ctx.drawImage(image,sx,sy,cellW,cellH,-size/2+PUFF_X_OFFSETS[frame],-PUFF_BASELINES[frame]*scale,size,size);
+}
 function drawCat(x,y,t,smoking=false){
   if(!art.cat.complete||!art.cat.naturalWidth){drawCatProcedural(x,y,t,smoking);return;}
   const skin=cosmeticItem(save.cosmetics.equipped.skin)||COSMETICS.skins[0]; const glasses=cosmeticItem(save.cosmetics.equipped.glasses)?.style||'none'; const hat=cosmeticItem(save.cosmetics.equipped.hat)?.style||'none';
   const blink=game.inv>0&&Math.floor(game.inv*16)%2===0, airborne=!cat.onGround;
   const canCycle=game.state==='run'&&art.catRunCycle.complete&&art.catRunCycle.naturalWidth;
-  const frame=canCycle?runFrameState():-1, usingCycle=frame>=0;
+  const canPuff=smoking&&art.catPuffCycle.complete&&art.catPuffCycle.naturalWidth;
+  const frame=canCycle?runFrameState():-1, puffFrame=canPuff?encounterFrameState():-1, usingCycle=frame>=0;
   ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.fillStyle='#05060a';ctx.globalAlpha*=.34;ctx.beginPath();ctx.ellipse(x+1,groundY+5,38,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
   const baseFilter=catSpriteFilter(skin),spriteFilter=game.ghostTime>0?(baseFilter==='none'?'drop-shadow(0 0 7px #80e1c1)':baseFilter+' drop-shadow(0 0 7px #80e1c1)'):baseFilter;
   const recoil=cat.landTime>0?cat.landTime/.14:0, launch=cat.launchTime>0?cat.launchTime/.12:0;
   const squash=Math.max(recoil,launch), footY=y+26;
-  ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.translate(x,footY);ctx.rotate(airborne&&!usingCycle?Math.max(-.11,Math.min(.08,cat.vy/4300)):0);ctx.scale(1+squash*.055,1-squash*.075);ctx.filter=spriteFilter;ctx.imageSmoothingEnabled=true;
+  const puffPose=canPuff?PUFF_TRANSFORMS[puffFrame]:PUFF_TRANSFORMS[0];
+  ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.translate(x,footY);ctx.rotate(canPuff?puffPose.r:airborne&&!usingCycle?Math.max(-.11,Math.min(.08,cat.vy/4300)):0);ctx.scale((1+squash*.055)*puffPose.sx,(1-squash*.075)*puffPose.sy);ctx.filter=spriteFilter;ctx.imageSmoothingEnabled=true;
   if(usingCycle) drawRunCycleFrame(frame);
+  else if(canPuff) drawPuffCycleFrame(puffFrame);
   else { const sprite=airborne&&art.catJump.complete?art.catJump:art.cat; ctx.drawImage(sprite,-56,-75,112,75); }
   ctx.filter='none';ctx.restore();
   if(usingCycle){ const eye=RUN_EYE_ANCHORS[frame]; drawGlasses(glasses,x+eye[0],footY+eye[1]);drawHat(hat,x+eye[0]-6,footY+eye[1]-23,t); }
+  else if(canPuff){ const eye=transformEncounterOffset(puffFrame,{x:PUFF_EYE_ANCHORS[puffFrame][0],y:PUFF_EYE_ANCHORS[puffFrame][1]}); drawGlasses(glasses,x+eye.x,footY+eye.y);drawHat(hat,x+eye.x-6,footY+eye.y-23,t); }
   else { drawGlasses(glasses,x+27,y-31);drawHat(hat,x+21,y-54,t); }
-  if(smoking){const ratio=game.cigMax?game.cigHp/game.cigMax:1;drawSmokeHeld(game.smokeable,x+43,y-7,ratio);}
+  if(smoking){const ratio=game.cigMax?game.cigHp/game.cigMax:1,mouth=catMouthSocket();drawSmokeHeld(game.smokeable,mouth.x,mouth.y,ratio);}
 }
 function drawObstacle(o){ ctx.save(); if(o.type==='can'){ roundRect(o.x,o.y,o.w,o.h,5,'#171820'); ctx.fillStyle='#6e7584'; ctx.fillRect(o.x+3,o.y+5,o.w-6,o.h-5); ctx.fillStyle='#aeb3bd'; ctx.fillRect(o.x,o.y+2,o.w,5); ctx.fillStyle='#252833'; ctx.fillRect(o.x+8,o.y+12,4,18); }
   else if(o.type==='cone'){ ctx.fillStyle='#f47a42'; ctx.beginPath(); ctx.moveTo(o.x+16,o.y); ctx.lineTo(o.x+30,o.y+o.h); ctx.lineTo(o.x+2,o.y+o.h); ctx.closePath(); ctx.fill(); ctx.fillStyle='#f5e7c6'; ctx.fillRect(o.x+7,o.y+16,18,5); ctx.fillStyle='#15161d'; ctx.fillRect(o.x,o.y+o.h-4,32,6); }
@@ -859,7 +893,15 @@ function drawParticles(){
     else {ctx.fillStyle='#d79a62';ctx.strokeStyle='#11131d';ctx.lineWidth=1;ctx.rotate(Math.PI/4);ctx.fillRect(-p.s*.55,-p.s*.55,p.s*1.1,p.s*1.1);ctx.strokeRect(-p.s*.55,-p.s*.55,p.s*1.1,p.s*1.1);}
     ctx.restore();
   }
-  for(const p of smokePuffs){ const a=(1-p.t/p.life)*.6; ctx.globalAlpha=a; if(isCandyMode()){ctx.fillStyle=`hsl(${(p.t*420+p.x)%360} 90% 70%)`;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.t*7);ctx.fillRect(-p.s*.55,-p.s*.18,p.s*1.1,p.s*.36);ctx.restore();}else{ctx.fillStyle=game.psyTime>0?`hsl(${(p.t*320)%360} 100% 70%)`:'#d8d4cf';ctx.beginPath();ctx.arc(p.x,p.y,p.s*(.6+p.t),0,Math.PI*2);ctx.fill();} } ctx.globalAlpha=1;
+  for(const p of smokePuffs){
+    const a=1-p.t/p.life;ctx.save();ctx.globalAlpha=a*.72;ctx.translate(p.x,p.y);ctx.rotate(p.rot+p.t*p.spin);
+    if(isCandyMode()){
+      ctx.fillStyle=`hsl(${p.hue+p.t*220} 90% 70%)`;ctx.strokeStyle='#11131d';ctx.lineWidth=.8;ctx.rotate(p.t*5);ctx.fillRect(-p.s*.72,-p.s*.2,p.s*1.44,p.s*.4);ctx.strokeRect(-p.s*.72,-p.s*.2,p.s*1.44,p.s*.4);
+    }else{
+      const color=game.psyTime>0?`hsl(${p.hue+p.t*180} 95% 72%)`:'#dedbd4';ctx.strokeStyle=color;ctx.lineWidth=Math.max(1.2,p.s*.23*a);ctx.lineCap='round';ctx.beginPath();ctx.arc(0,0,p.s*(.42+p.t*.68),-.25,Math.PI*1.25);ctx.arc(p.s*.72,-p.s*.22,p.s*(.28+p.t*.35),Math.PI*.85,Math.PI*2.1);ctx.stroke();ctx.globalAlpha*=.25;ctx.fillStyle=color;ctx.beginPath();ctx.arc(-p.s*.18,p.s*.08,p.s*(.22+p.t*.28),0,Math.PI*2);ctx.fill();
+    }
+    ctx.restore();
+  } ctx.globalAlpha=1;
 }
 function drawGroundSmoke(smoke,x,y){
   smoke=displaySmoke(smoke);
