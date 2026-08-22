@@ -23,14 +23,19 @@ Last updated: 2026-08-22 (America/New_York)
 - Added unit coverage that enforces complete mappings and verifies presentation swaps preserve mechanics.
 - Rejected and removed the generated-raster direction, including eleven character, cosmetic, hazard, loot, and Original/Candy encounter atlases plus the obsolete generated concept board.
 - Restored the prototype's thick-ink canvas identity as the shipping source of truth and documented it in `docs/CODE_NATIVE_ART.md`.
-- Added one shared horizontal street-gremlin mascot renderer for the title, gameplay, encounter, and wardrobe surfaces, with hostile eyes, bandana, snaggletooth, question-mark tail, run gait, sprint lean, airborne tilt, and puff recoil.
+- Added one shared original urban-chibi mascot renderer for title, gameplay, encounters, wardrobe, and every cosmetic thumbnail: oversized head, tiny upright bomber body, sneakers, two arms, two legs, directional face, question-mark tail, run gait, airborne tilt, and puff recoil.
 - Attached every encounter prop to the cat's mouth through per-device sockets, moved puff/confetti emission to the mouth, and removed the duplicate encounter-pedestal prop.
 - Restored code-native ground hazards, flying hazards, loot, and all 22 Original/Candy encounter props while preserving their animation, gameplay geometry, warning, burn, reward, and mode-parity contracts.
 - Rebuilt all twelve skins as pattern/color treatments of the same mascot and all twenty-two equippables as bold code-drawn head-local layers.
-- Refined the shared mascot around a smaller phone-scale footprint, longer feline body, connected chest, articulated paws, and distinct planted/run/airborne/puff limb poses; the title now presents the unobscured base face instead of burying it under forced accessories.
+- Kept the mascot compact at gameplay scale while giving title and wardrobe enough size to judge its unobscured base face and equipped layers.
 - Added code-drawn thumbnails to all thirty-six wardrobe cards so skins and equippables advertise their actual in-game appearance before purchase or equip.
-- Corrected the mascot from a front-facing, heavy torso into a slimmer street-cat profile with a flatter back, tucked belly, dominant near eye, receding far eye, and forward-shifted muzzle.
-- Rebuilt the mascot from a documented vector reference board around distinct pelvis/ribcage masses, a shoulder-neck-skull chain, four depth-layered jointed limbs, and six interpolated run keys covering contact through tucked flight.
+- Corrected the face from camera-facing/long-snouted anatomy into a short round three-quarter muzzle with a dominant near eye, smaller far eye, two top-contour ears, and no neck folds or side-ear growth.
+- Rebuilt the rejected quadruped from the owner's supplied Cat Quest proportion references as an original bipedal street cat with a cropped bomber, dark pants, mint sneakers, a low waist-level tail, and six smoothly connected authored run keys.
+- Rejected that transitional renderer and replaced the entire presentation with Gremlin Zine: asymmetric organic face shapes, six authored whole-pose run keys, imperfect screen-print character/cosmetic forms, raw paper-and-ink UI, offset red shadows, muted district palettes, halftone grain, and pasted street bills.
+- Rejected the later realistic-profile experiment after browser review; removed its neck bridge/folds, side-ear construction, and quadruped body in favor of a compact Cat Quest-level biped abstraction with an original urban identity.
+- Fixed the smoke pose to replace the normal near-arm swing with one bent raised arm, preserving exactly two arms and placing every Original/Candy prop on the mouth socket.
+- Fixed a real browser crash in the cosmetic thumbnail renderer (`scale()` was missing its Y argument), added a browser-realistic unit assertion, and verified an actual cosmetic box break/unlock with zero console errors.
+- Raised flyers into an optional airborne risk lane, enlarged and recolored all three code-native silhouettes for contrast, added an `AIR +2` lane label, and made staying grounded safe while jumping close earns the air-dodge reward.
 - Added an animated closet loadout preview with safe preview-only handling for locked items and immediate persistent equip behavior for owned items.
 - Added overt non-character motion to neon signs, windows, moon glow, overhead wires, street steam, every ground-hazard class, aerial threat details, loot, and Original/Candy encounter devices.
 - Added encounter focus lighting, pulsing floor auras, boss orbit chevrons, device glows/screens/bubbles, and puff-synchronized impact rings without changing encounter health, input cadence, or rewards.
@@ -39,7 +44,7 @@ Last updated: 2026-08-22 (America/New_York)
 - Extracted a versioned save schema and guarded persistence adapter while retaining both historical browser keys. Existing saves migrate in place without changing progression, balance, cosmetics, mute state, or content mode.
 - Added independent corrupt-current/valid-legacy recovery, numeric and upgrade repair, forward-field preservation, equipped-cosmetic retention, blocked-storage session fallback, and portable JSON backup download/restore controls in the wardrobe.
 - Extracted upgrade costs/caps, player power, combo behavior, encounter health/rewards, boss cadence, loot boundaries, and cosmetic unlock conditions into one deterministic progression module without changing shipped balance.
-- Added a query-gated, session-only playtest lab that reaches every boss, cycles street encounters, switches presentation modes, grants temporary PACKS, restores health, and unlocks the full wardrobe without writing to the player's real browser save.
+- Added a query-gated, session-only playtest lab that reaches every boss, cycles street encounters, spawns deterministic flyer/box regression cases, switches presentation modes, grants temporary PACKS, restores health, and unlocks the full wardrobe without writing to the player's real browser save.
 - Rebuilt the runtime city with inked silhouettes, brick texture, neon windows, fire escapes, cables, road damage, sprint streaks, and stronger lighting.
 - Reworked burst particles into distinct dust, spark, hit, heal, and loot shapes.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
@@ -56,6 +61,7 @@ Last updated: 2026-08-22 (America/New_York)
 - Candy preference persistence across reload
 - 844×390 Original and Candy encounter rendering with the revised character and prop layers
 - 390×844 Gremlin Cut title mascot, Original Vape Lord encounter, puff recoil, mouth attachment, and inked smoke curl rendering
+- 390×844 upright urban-chibi title and cigarette encounter, including short three-quarter muzzle, bomber/sneaker silhouette, waist-level tail, bent smoke arm, and mouth attachment
 - 390×844 normal-URL run and airborne states with the shared code-native Tuxedo mascot and no playtest controls
 - 390×844 animated wardrobe preview with the code-native Hell Tiger, Laser Visor, and Traffic Cone King stress loadout
 - 1280×720 active run with no browser warnings or errors
@@ -75,6 +81,8 @@ Last updated: 2026-08-22 (America/New_York)
 - Query-gated lab entry and complete control layout at 390×844, plus immediate Original Vape Lord and Candy Candy Crusher boss loads with correct real encounter tiers
 - Candy Cursed Sundae and Phantom Gumball Machine boss/device rendering at 568×320, including corrected long-name, toast, health-meter, and lab-control clearance
 - Session-only unlock-all cosmetic preview with Hell Tiger, Laser Visor, and Traffic Cone King, plus a separate normal-URL reload proving temporary Candy mode, PACKS, and unlock mutations did not persist
+- Fresh-run deterministic cosmetic-box break with the upright hitbox, Street Goggles unlock, continued play, and no crash
+- High-lane deterministic flyer pass with the grounded upright mascot safely below the `AIR +2` threat
 - GitHub Pages build and deployment workflow
 
 ## Next milestone
@@ -84,7 +92,7 @@ Add automated visual snapshot baselines and broader gameplay state-transition co
 ## Known limitations
 
 - The production runtime is still mostly the original single-file implementation.
-- The Gremlin Cut intentionally favors bold code-drawn shapes over frame-heavy animation; additional gait and expression poses can still deepen the character without changing its silhouette.
+- The Gremlin Cut intentionally favors bold code-drawn shapes over frame-heavy animation; the current six-key biped gait can still gain secondary jacket, ear, and expression motion without changing its approved silhouette.
 - Visual snapshot comparison remains manual rather than pixel-diff automated.
 - The lab makes the full boss/cosmetic matrix reachable without grinding, but browser snapshot comparison is still manual rather than pixel-diff automated.
 - Portable backups are manual downloads; optional cloud synchronization is not part of the public-alpha scope.
