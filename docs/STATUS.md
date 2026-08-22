@@ -35,6 +35,8 @@ Last updated: 2026-08-21 (America/New_York)
 - Added overt non-character motion to neon signs, windows, moon glow, overhead wires, street steam, every ground-hazard class, aerial threat details, loot, and Original/Candy encounter devices.
 - Replaced all 22 Original/Candy procedural encounter-device bodies with paired production atlases, measured crop metadata, burn-aware stick cropping, and mouth-end anchors; the code-native bodies remain loading fallbacks only.
 - Added encounter focus lighting, pulsing floor auras, boss orbit chevrons, device glows/screens/bubbles, and puff-synchronized impact rings without changing encounter health, input cadence, or rewards.
+- Replaced global CSS skin filters with a bounded pose-aware recolor cache that changes only authored warm-fur pixels across neutral, run, jump, puff, and wardrobe frames while preserving eyes, muzzle, paws, nose, ink, tape, bandana, hats, and glasses.
+- Extracted warm-fur classification and luminance-preserving palette math into a tested rendering module with protected-color regression coverage.
 - Rebuilt the runtime city with inked silhouettes, brick texture, neon windows, fire escapes, cables, road damage, sprint streaks, and stronger lighting.
 - Reworked burst particles into distinct dust, spark, hit, heal, and loot shapes.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
@@ -70,16 +72,19 @@ Last updated: 2026-08-21 (America/New_York)
 - 568×320 live Candy chocolate-roll encounter, bite/recoil, and hot Original-mode cigar swap on the same mouth socket
 - 390×844 Original cigar encounter with production device art, stable HUD/action-control clearance, and intact mouth attachment
 - Source-atlas review plus deterministic dimensions, alpha-capable PNG format, complete 22-device mapping, burn-state hook, and byte budgets for both encounter atlases
+- Animated wardrobe review of Calico, Blackout, Snowball, Neon, and Bone Cat extremes with preserved authored face details and unchanged cosmetic layers
+- 568×320 Tuxedo run, jump, ready, and recoil frames plus 390×844 run/encounter coverage through the pose-aware palette cache
+- Unit coverage proving ginger fur recolors while gold eyes, cream muzzle, pink nose, and black ink remain byte-identical
 - GitHub Pages build and deployment workflow
 
 ## Next milestone
 
-Finish explicit per-pose skin masks so colorways no longer depend on whole-image filters, then extract save migration and progression behind tests. Add developer encounter shortcuts and visual snapshots before calling the full boss/device matrix covered.
+Extract versioned save migration and progression behind tests, then add developer encounter shortcuts and visual snapshots before calling the full boss/device matrix covered.
 
 ## Known limitations
 
 - The production runtime is still mostly the original single-file implementation.
-- Non-default skin base recoloring is still filter-based beneath the restored pattern layer; dedicated per-pose masks are needed for a final cosmetic pipeline.
+- Skin recoloring is pose-aware and selective, but patterns remain compact code-native overlays rather than authored texture layers for every pose.
 - Encounter devices and sticks use production art; their loading fallback, gameplay-critical burn cues, collision-independent effects, hazard collision, and warning overlays intentionally remain code-native.
 - Browser automation currently covers the highest-risk paths, not the full boss/cosmetic matrix.
 - The public web alpha should not be described as mobile-store ready.

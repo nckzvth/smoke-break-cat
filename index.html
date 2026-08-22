@@ -238,6 +238,7 @@
 </div>
 <script type="module">
 import { CONTENT_MODE, assertCompleteCandyRegistry, normalizeContentMode, presentEncounter, toggleContentMode } from './src/content/content-modes.js';
+import { recolorFurPixel, skinRgb } from './src/rendering/skin-palette.js';
 
 (() => {
 'use strict';
@@ -869,7 +870,7 @@ function renderWardrobePreview(t){
   if(!ui.closetPreview||ui.closet.style.display!=='block'||!imageReady(art.cat))return;const p=ui.closetPreview.getContext('2d'),w=ui.closetPreview.width,h=ui.closetPreview.height,skin=cosmeticItem(wardrobePreview.skin)||COSMETICS.skins[0],glasses=cosmeticItem(wardrobePreview.glasses)?.style||'none',hat=cosmeticItem(wardrobePreview.hat)?.style||'none';
   p.clearRect(0,0,w,h);p.save();p.globalAlpha=.18;p.strokeStyle='#b388ff';p.lineWidth=3;for(let i=0;i<5;i++){const x=(i*157+t*36)%760-60;p.beginPath();p.moveTo(x,34+i*37);p.lineTo(x+72,34+i*37);p.stroke();}p.restore();
   p.fillStyle='#08090e';p.fillRect(0,h-42,w,8);p.fillStyle='#3c3d49';p.fillRect(0,h-34,w,34);p.fillStyle='#ffd166';for(let x=-((t*90)%150);x<w;x+=150)p.fillRect(x,h-17,78,4);
-  const bob=Math.sin(t*3.2)*3,dx=72,dy=40+bob,dw=300,dh=200;p.save();p.filter=catSpriteFilter(skin);p.drawImage(art.cat,dx,dy,dw,dh);p.filter='none';p.globalAlpha=.76;
+  const bob=Math.sin(t*3.2)*3,dx=72,dy=40+bob,dw=300,dh=200;p.save();drawSkinnedSprite(p,art.cat,skin,0,0,art.cat.naturalWidth,art.cat.naturalHeight,dx,dy,dw,dh,'closet');p.globalAlpha=.76;
   if(skin.pattern==='tux'){p.fillStyle='#f7f0dc';p.beginPath();p.moveTo(dx+190,dy+116);p.lineTo(dx+225,dy+130);p.lineTo(dx+205,dy+168);p.lineTo(dx+177,dy+147);p.closePath();p.fill();}
   else if(skin.pattern==='calico'||skin.pattern==='tortie'){p.fillStyle=skin.pattern==='calico'?'#272831':'#c95e35';for(const [ox,oy,r] of [[120,118,20],[172,150,16],[219,74,12]]){p.beginPath();p.arc(dx+ox,dy+oy,r,0,Math.PI*2);p.fill();}}
   else if(skin.pattern==='tabby'||skin.pattern==='tiger'){p.strokeStyle=skin.pattern==='tiger'?'#24191a':'#493e3a';p.lineWidth=7;for(let i=0;i<3;i++){p.beginPath();p.moveTo(dx+105+i*35,dy+105);p.lineTo(dx+121+i*35,dy+126);p.stroke();}}
@@ -896,11 +897,27 @@ function drawCatProcedural(x,y,t,smoking=false){
   if(smoking){ctx.strokeStyle=ink;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(x+13,y-8);ctx.lineTo(x+27,y-23);ctx.stroke();ctx.strokeStyle=body;ctx.lineWidth=5;ctx.stroke();ctx.fillStyle=body;ctx.strokeStyle=ink;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x+28,y-23,4,0,Math.PI*2);ctx.fill();ctx.stroke();const ratio=game.cigMax?game.cigHp/game.cigMax:1;drawSmokeHeld(game.smokeable,x+10,y-31,ratio);}
   ctx.restore();
 }
-function catSpriteFilter(skin){
-  const filters={
-    skin_street:'none',skin_tux:'grayscale(.45) brightness(.72)',skin_calico:'sepia(.18) saturate(1.25)',skin_siamese:'sepia(.45) saturate(.7) brightness(1.05)',skin_black:'grayscale(1) brightness(.34)',skin_snow:'grayscale(1) brightness(1.38)',skin_tabby:'sepia(.2) saturate(.65) brightness(.82)',skin_tortie:'sepia(.35) saturate(1.4) brightness(.72)',skin_ghost:'hue-rotate(155deg) saturate(.8) brightness(1.25)',skin_neon:'hue-rotate(95deg) saturate(1.6)',skin_tiger:'hue-rotate(-12deg) saturate(1.45) brightness(.92)',skin_skeleton:'grayscale(1) sepia(.18) brightness(1.15)'
-  };
-  return filters[skin.id]||'none';
+const skinFrameCache=new Map();
+function cachedSkinFrame(image,skin,sx,sy,sw,sh,dw,dh,label){
+  if(skin.id==='skin_street')return null;
+  const width=Math.max(1,Math.round(dw)),height=Math.max(1,Math.round(dh)),key=`${skin.id}:${label}:${sx}:${sy}:${sw}:${sh}:${width}:${height}`;
+  if(skinFrameCache.has(key))return skinFrameCache.get(key);
+  const frame=document.createElement('canvas');frame.width=width;frame.height=height;const p=frame.getContext('2d',{willReadFrequently:true});p.imageSmoothingEnabled=true;p.imageSmoothingQuality='high';p.drawImage(image,sx,sy,sw,sh,0,0,width,height);
+  try{
+    const pixels=p.getImageData(0,0,width,height),body=skinRgb(skin.body),head=skinRgb(skin.head);
+    for(let i=0;i<pixels.data.length;i+=4){
+      const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2],a=pixels.data[i+3];if(a<4)continue;
+      // Fur is the warm orange family only. Cream muzzle/paws, yellow eyes, pink nose/ears,
+      // black ink/bandana, white tape and every cosmetic retain their authored colors.
+      const color=recolorFurPixel(r,g,b,body,head);pixels.data[i]=color[0];pixels.data[i+1]=color[1];pixels.data[i+2]=color[2];
+    }
+    p.putImageData(pixels,0,0);
+  }catch(error){return null;}
+  if(skinFrameCache.size>=160)skinFrameCache.delete(skinFrameCache.keys().next().value);skinFrameCache.set(key,frame);return frame;
+}
+function drawSkinnedSprite(target,image,skin,sx,sy,sw,sh,dx,dy,dw,dh,label){
+  const frame=cachedSkinFrame(image,skin,sx,sy,sw,sh,dw,dh,label);target.imageSmoothingEnabled=true;
+  if(frame)target.drawImage(frame,dx,dy,dw,dh);else target.drawImage(image,sx,sy,sw,sh,dx,dy,dw,dh);
 }
 const RUN_BASELINES=[357,354,355,270,270,255];
 const RUN_X_OFFSETS=[1,-6,9,-1,-5,3];
@@ -919,10 +936,10 @@ function runFrameState(){
   if(cat.landTime>.075) return 4;
   return Math.floor(cat.frame)%6;
 }
-function drawRunCycleFrame(frame){
+function drawRunCycleFrame(frame,skin){
   const image=art.catRunCycle, cellW=image.naturalWidth/3, cellH=image.naturalHeight/2;
   const sx=(frame%3)*cellW, sy=Math.floor(frame/3)*cellH, size=128, scale=size/384;
-  ctx.drawImage(image,sx,sy,cellW,cellH,-64+RUN_X_OFFSETS[frame],-RUN_BASELINES[frame]*scale,size,size);
+  drawSkinnedSprite(ctx,image,skin,sx,sy,cellW,cellH,-64+RUN_X_OFFSETS[frame],-RUN_BASELINES[frame]*scale,size,size,`run-${frame}`);
 }
 function encounterFrameState(){
   if(cat.puffTime<=0) return 0;
@@ -938,10 +955,10 @@ function transformEncounterOffset(frame,point){
   const pose=PUFF_TRANSFORMS[frame],px=point.x*pose.sx,py=point.y*pose.sy,c=Math.cos(pose.r),s=Math.sin(pose.r);
   return {x:px*c-py*s,y:px*s+py*c};
 }
-function drawPuffCycleFrame(frame){
+function drawPuffCycleFrame(frame,skin){
   const image=art.catPuffCycle,cellW=image.naturalWidth/2,cellH=image.naturalHeight/2,size=118,scale=size/512;
   const sx=(frame%2)*cellW,sy=Math.floor(frame/2)*cellH;
-  ctx.drawImage(image,sx,sy,cellW,cellH,-size/2+PUFF_X_OFFSETS[frame],-PUFF_BASELINES[frame]*scale,size,size);
+  drawSkinnedSprite(ctx,image,skin,sx,sy,cellW,cellH,-size/2+PUFF_X_OFFSETS[frame],-PUFF_BASELINES[frame]*scale,size,size,`puff-${frame}`);
 }
 function drawSpriteSkinMarks(skin,eye,t){
   const p=skin.pattern;if(!p||p==='plain'||p==='black'||p==='snow')return;const hx=eye[0],hy=eye[1],bx=hx-34,by=hy+27;ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.globalAlpha=.82;
@@ -963,15 +980,14 @@ function drawCat(x,y,t,smoking=false){
   const canPuff=smoking&&art.catPuffCycle.complete&&art.catPuffCycle.naturalWidth;
   const frame=canCycle?runFrameState():-1, puffFrame=canPuff?encounterFrameState():-1, usingCycle=frame>=0;
   ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.fillStyle='#05060a';ctx.globalAlpha*=.34;ctx.beginPath();ctx.ellipse(x+1,groundY+5,38,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  const baseFilter=catSpriteFilter(skin),spriteFilter=game.ghostTime>0?(baseFilter==='none'?'drop-shadow(0 0 7px #80e1c1)':baseFilter+' drop-shadow(0 0 7px #80e1c1)'):baseFilter;
   const recoil=cat.landTime>0?cat.landTime/.14:0, launch=cat.launchTime>0?cat.launchTime/.12:0;
   const squash=Math.max(recoil,launch), footY=y+26;
   const puffPose=canPuff?PUFF_TRANSFORMS[puffFrame]:PUFF_TRANSFORMS[0];
   const eyeLocal=usingCycle?RUN_EYE_ANCHORS[frame]:canPuff?PUFF_EYE_ANCHORS[puffFrame]:[27,-57];
-  ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.translate(x,footY);ctx.rotate(canPuff?puffPose.r:airborne&&!usingCycle?Math.max(-.11,Math.min(.08,cat.vy/4300)):0);ctx.scale((1+squash*.055)*puffPose.sx,(1-squash*.075)*puffPose.sy);ctx.filter=spriteFilter;ctx.imageSmoothingEnabled=true;
-  if(usingCycle) drawRunCycleFrame(frame);
-  else if(canPuff) drawPuffCycleFrame(puffFrame);
-  else { const sprite=airborne&&art.catJump.complete?art.catJump:art.cat; ctx.drawImage(sprite,-56,-75,112,75); }
+  ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.translate(x,footY);ctx.rotate(canPuff?puffPose.r:airborne&&!usingCycle?Math.max(-.11,Math.min(.08,cat.vy/4300)):0);ctx.scale((1+squash*.055)*puffPose.sx,(1-squash*.075)*puffPose.sy);ctx.filter=game.ghostTime>0?'drop-shadow(0 0 7px #80e1c1)':'none';ctx.imageSmoothingEnabled=true;
+  if(usingCycle) drawRunCycleFrame(frame,skin);
+  else if(canPuff) drawPuffCycleFrame(puffFrame,skin);
+  else { const sprite=airborne&&art.catJump.complete?art.catJump:art.cat; drawSkinnedSprite(ctx,sprite,skin,0,0,sprite.naturalWidth,sprite.naturalHeight,-56,-75,112,75,airborne?'jump':'base'); }
   ctx.filter='none';drawSpriteSkinMarks(skin,eyeLocal,t);drawGlasses(glasses,eyeLocal[0],eyeLocal[1],t);drawHat(hat,eyeLocal[0]-6,eyeLocal[1]-23,t);ctx.restore();
   if(smoking){const ratio=game.cigMax?game.cigHp/game.cigMax:1,mouth=catMouthSocket();drawSmokeHeld(game.smokeable,mouth.x,mouth.y,ratio);}
 }
