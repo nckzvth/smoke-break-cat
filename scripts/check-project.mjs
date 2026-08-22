@@ -16,6 +16,18 @@ requireMatch(/street-cat-run-cycle-v2\.png/, 'runtime must load the six-frame ru
 requireMatch(/street-cat-puff-cycle-v1\.png/, 'runtime must load the four-frame encounter-action atlas');
 requireMatch(/hazards-ground-v1\.png/, 'runtime must load the ground-hazard atlas');
 requireMatch(/hazards-flying-v1\.png/, 'runtime must load the flying-hazard atlas');
+requireMatch(/cosmetics-glasses-v1\.png/, 'runtime must load the production eyewear atlas');
+requireMatch(/cosmetics-hats-v1\.png/, 'runtime must load the production hat atlas');
+requireMatch(/skin_skeleton:'grayscale/, 'Bone Cat must use the real skin_skeleton renderer key');
+requireMatch(/drawGlasses\(glasses,eyeLocal\[0\],eyeLocal\[1\],t\)/, 'eyewear must render inside the pose-local transform');
+requireMatch(/drawHat\(hat,eyeLocal\[0\]-6,eyeLocal\[1\]-23,t\)/, 'hats must render inside the pose-local transform');
+if (/skin_bone:/.test(html)) failures.push('obsolete skin_bone renderer key must not return');
+for (const style of ['shades','round','heart','pit','cyber','star','goggles','monocle','threeD','lightning','laser']) {
+  requireMatch(new RegExp(`${style}:\\{frame:`), `missing production eyewear mapping for ${style}`);
+}
+for (const style of ['beanie','trucker','cowboy','wizard','crown','bucket','devil','propeller','halo','chef','cone']) {
+  requireMatch(new RegExp(`${style}:\\{frame:`), `missing production hat mapping for ${style}`);
+}
 if (/street-cat-run-v1\.png/.test(html)) failures.push('runtime must not fall back to the superseded binary gallop pose');
 
 if (/user-scalable\s*=\s*no/i.test(html)) {
@@ -52,9 +64,14 @@ const hazardAssets = [
   {name:'ground hazards',file:'hazards-ground-v1.png',width:1152,height:768,budget:800_000},
   {name:'flying hazards',file:'hazards-flying-v1.png',width:1152,height:768,budget:600_000},
 ];
+const cosmeticAssets = [
+  {name:'eyewear cosmetics',file:'cosmetics-glasses-v1.png',width:1152,height:768,budget:400_000},
+  {name:'hat cosmetics',file:'cosmetics-hats-v1.png',width:1152,height:768,budget:650_000},
+];
 const productionAssets = [
   ...characterAssets.map((asset)=>({...asset,directory:'characters'})),
   ...hazardAssets.map((asset)=>({...asset,directory:''})),
+  ...cosmeticAssets.map((asset)=>({...asset,directory:''})),
 ];
 for (const asset of productionAssets) {
   const path = new URL(`../public/assets/${asset.directory?`${asset.directory}/`:''}${asset.file}`, import.meta.url);
@@ -78,4 +95,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Project checks passed: ${ids.length} unique ids, ${scriptBlocks.length} valid inline script, ${characterAssets.length} character assets, and ${hazardAssets.length} hazard atlases.`);
+console.log(`Project checks passed: ${ids.length} unique ids, ${scriptBlocks.length} valid inline script, ${characterAssets.length} character assets, ${hazardAssets.length} hazard atlases, and ${cosmeticAssets.length} cosmetic atlases.`);
