@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   drawCodeCat,
+  drawCosmeticThumbnail,
   drawCodeGlasses,
   drawCodeHat,
   drawTitleMascot,
@@ -28,6 +29,7 @@ const patterns = ['plain','tux','calico','siamese','black','snow','tabby','torti
 
 test('exports one reusable code-native mascot system', () => {
   assert.equal(typeof drawCodeCat, 'function');
+  assert.equal(typeof drawCosmeticThumbnail, 'function');
   assert.equal(typeof drawTitleMascot, 'function');
   assert.equal(typeof drawWardrobeMascot, 'function');
 });
@@ -46,6 +48,7 @@ test('renders every skin and equippable without a raster dependency', () => {
   }
   for (const style of glasses) drawCodeGlasses(p, style, 0, 0, 2);
   for (const style of hats) drawCodeHat(p, style, 0, 0, 2);
+  for (const pose of ['idle','run','jump','puff']) drawCodeCat(p, 100, 100, 2, { pose, airborne:pose==='jump', puff:pose==='puff'?1:0 });
 });
 
 test('renders title and wardrobe surfaces from the same mascot', () => {
@@ -55,4 +58,5 @@ test('renders title and wardrobe surfaces from the same mascot', () => {
 
   drawTitleMascot(canvas, 2, skin);
   drawWardrobeMascot(canvas, 2, { skin, glasses:'laser', hat:'cone' });
+  drawCosmeticThumbnail(canvas, 2, { skin, glasses:'laser', hat:'cone' });
 });

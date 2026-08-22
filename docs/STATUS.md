@@ -27,6 +27,8 @@ Last updated: 2026-08-22 (America/New_York)
 - Attached every encounter prop to the cat's mouth through per-device sockets, moved puff/confetti emission to the mouth, and removed the duplicate encounter-pedestal prop.
 - Restored code-native ground hazards, flying hazards, loot, and all 22 Original/Candy encounter props while preserving their animation, gameplay geometry, warning, burn, reward, and mode-parity contracts.
 - Rebuilt all twelve skins as pattern/color treatments of the same mascot and all twenty-two equippables as bold code-drawn head-local layers.
+- Refined the shared mascot around a smaller phone-scale footprint, longer feline body, connected chest, articulated paws, and distinct planted/run/airborne/puff limb poses; the title now presents the unobscured base face instead of burying it under forced accessories.
+- Added code-drawn thumbnails to all thirty-six wardrobe cards so skins and equippables advertise their actual in-game appearance before purchase or equip.
 - Added an animated closet loadout preview with safe preview-only handling for locked items and immediate persistent equip behavior for owned items.
 - Added overt non-character motion to neon signs, windows, moon glow, overhead wires, street steam, every ground-hazard class, aerial threat details, loot, and Original/Candy encounter devices.
 - Added encounter focus lighting, pulsing floor auras, boss orbit chevrons, device glows/screens/bubbles, and puff-synchronized impact rings without changing encounter health, input cadence, or rewards.

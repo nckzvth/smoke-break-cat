@@ -13,7 +13,7 @@ Turn the playable prototype into a reliable public web alpha on GitHub Pages, th
 - The first extracted module now owns the tested two-mode presentation registry, and Little Baby Idiot Mode covers every current encounter.
 - The generated-raster direction was rejected. The Gremlin Cut restores the prototype's thick-ink canvas identity through one shared code-native mascot, skin, and equippable system; generated character, cosmetic, hazard, loot, and encounter atlases have been removed.
 - Full modularization, broader automated gameplay coverage, accessibility work, and visual snapshot automation remain active roadmap items.
-- The current visual slice covers the shared code-drawn hero, run/action transforms, twelve pattern-aware skins, twenty-two equippables, procedural hazards/loot, environment motion, encounter staging, and every Original/Candy prop.
+- The current visual slice covers the shared code-drawn hero, distinct idle/run/airborne/puff poses, thirty-six visual wardrobe thumbnails, twelve pattern-aware skins, twenty-two equippables, procedural hazards/loot, environment motion, encounter staging, and every Original/Candy prop.
 - Versioned save migration, corrupt-save recovery, storage-failure fallback, and manual JSON backup/restore are implemented behind a tested adapter while preserving both historical browser keys.
 - Progression costs, combat power, encounter health/rewards, loot boundaries, boss cadence, and unlock conditions now live in one deterministic tested module. A query-gated, session-only lab reaches every boss, street encounter, presentation mode, and cosmetic without touching the real save.
 
