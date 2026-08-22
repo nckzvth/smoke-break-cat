@@ -24,6 +24,7 @@ Last updated: 2026-08-21 (America/New_York)
 - Established a generated neo-retro character/VFX concept anchor with documented palette, layering rules, prompt, source, and usage status.
 - Added optimized transparent neutral, gallop, and jump character assets generated from the approved identity reference.
 - Integrated real character art into the title, run, jump, and encounter states while retaining separate cosmetic and Original/Candy prop layers.
+- Replaced the binary neutral/gallop pose swap with a six-frame identity-locked run atlas, measured paw anchors, speed-limited frame timing, staged takeoff, velocity-aware airborne rotation, and landing recoil.
 - Rebuilt the runtime city with inked silhouettes, brick texture, neon windows, fire escapes, cables, road damage, sprint streaks, and stronger lighting.
 - Reworked burst particles into distinct dust, spark, hit, heal, and loot shapes.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
@@ -40,7 +41,10 @@ Last updated: 2026-08-21 (America/New_York)
 - Candy preference persistence across reload
 - 844×390 Original and Candy encounter rendering with the revised character and prop layers
 - 568×320 contact/gallop animation and short-landscape launch layout with optimized production assets
+- 568×320 consecutive six-frame run samples plus takeoff, airborne, landing-recoil, and resumed-run samples
 - 390×844 title and active encounter rendering with the generated character art
+- 390×844 active run with the six-frame atlas and Little Baby Idiot Mode enabled
+- 1280×720 active run with no browser warnings or errors
 - 390×844 live GitHub Pages start/run smoke test
 - GitHub Pages build and deployment workflow
 
