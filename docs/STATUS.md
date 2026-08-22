@@ -33,6 +33,8 @@ Last updated: 2026-08-21 (America/New_York)
 - Replaced all 22 non-default code-placeholder hats and glasses with two measured production-art atlases while retaining code-native loading fallbacks.
 - Added an animated closet loadout preview with safe preview-only handling for locked items and immediate persistent equip behavior for owned items.
 - Added overt non-character motion to neon signs, windows, moon glow, overhead wires, street steam, every ground-hazard class, aerial threat details, loot, and Original/Candy encounter devices.
+- Replaced all 22 Original/Candy procedural encounter-device bodies with paired production atlases, measured crop metadata, burn-aware stick cropping, and mouth-end anchors; the code-native bodies remain loading fallbacks only.
+- Added encounter focus lighting, pulsing floor auras, boss orbit chevrons, device glows/screens/bubbles, and puff-synchronized impact rings without changing encounter health, input cadence, or rewards.
 - Rebuilt the runtime city with inked silhouettes, brick texture, neon windows, fire escapes, cables, road damage, sprint streaks, and stronger lighting.
 - Reworked burst particles into distinct dust, spark, hit, heal, and loot shapes.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
@@ -65,16 +67,19 @@ Last updated: 2026-08-21 (America/New_York)
 - 568×320 Tuxedo run and airborne frames with restored markings and clean pose-local rendering
 - Clean-browser wardrobe, preview, run, and ambient-motion smoke test with no warnings or errors
 - Deterministic PNG dimension, alpha, mapping-completeness, pose-local-rendering, and byte-budget enforcement for both cosmetic atlases
+- 568×320 live Candy chocolate-roll encounter, bite/recoil, and hot Original-mode cigar swap on the same mouth socket
+- 390×844 Original cigar encounter with production device art, stable HUD/action-control clearance, and intact mouth attachment
+- Source-atlas review plus deterministic dimensions, alpha-capable PNG format, complete 22-device mapping, burn-state hook, and byte budgets for both encounter atlases
 - GitHub Pages build and deployment workflow
 
 ## Next milestone
 
-Replace the remaining procedural encounter-device bodies with production art, then finish explicit per-pose skin masks so colorways no longer depend on whole-image filters. Save migration and progression extraction remain the next architecture targets.
+Finish explicit per-pose skin masks so colorways no longer depend on whole-image filters, then extract save migration and progression behind tests. Add developer encounter shortcuts and visual snapshots before calling the full boss/device matrix covered.
 
 ## Known limitations
 
 - The production runtime is still mostly the original single-file implementation.
 - Non-default skin base recoloring is still filter-based beneath the restored pattern layer; dedicated per-pose masks are needed for a final cosmetic pipeline.
-- Encounter props remain code-native, though their animation overlays are now active; hazard collision and warning overlays intentionally remain code-native.
+- Encounter devices and sticks use production art; their loading fallback, gameplay-critical burn cues, collision-independent effects, hazard collision, and warning overlays intentionally remain code-native.
 - Browser automation currently covers the highest-risk paths, not the full boss/cosmetic matrix.
 - The public web alpha should not be described as mobile-store ready.
