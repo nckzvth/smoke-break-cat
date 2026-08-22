@@ -13,6 +13,7 @@ requireMatch(/<canvas\s+id="game"/, 'index.html must include the game canvas');
 requireMatch(/<link\s+rel="manifest"/, 'index.html must link the web manifest');
 requireMatch(/smoke-mode/, 'compact smoke-mode layout hooks must remain present');
 requireMatch(/street-cat-run-cycle-v2\.png/, 'runtime must load the six-frame run-cycle atlas');
+requireMatch(/street-cat-puff-cycle-v1\.png/, 'runtime must load the four-frame encounter-action atlas');
 if (/street-cat-run-v1\.png/.test(html)) failures.push('runtime must not fall back to the superseded binary gallop pose');
 
 if (/user-scalable\s*=\s*no/i.test(html)) {
@@ -43,6 +44,7 @@ const characterAssets = [
   {name:'base',file:'street-cat-base-v1.png',width:768,height:512,budget:600_000},
   {name:'jump',file:'street-cat-jump-v1.png',width:768,height:512,budget:600_000},
   {name:'run cycle',file:'street-cat-run-cycle-v2.png',width:1152,height:768,budget:800_000},
+  {name:'puff cycle',file:'street-cat-puff-cycle-v1.png',width:1024,height:1024,budget:1_000_000},
 ];
 for (const asset of characterAssets) {
   const path = new URL(`../public/assets/characters/${asset.file}`, import.meta.url);
