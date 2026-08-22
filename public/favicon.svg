@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Smoke Break Cat</title>
+  <rect width="64" height="64" rx="14" fill="#11131d"/>
+  <path d="M13 28 16 12l13 10h6l13-10 3 16v17c0 8-8 14-19 14S13 53 13 45Z" fill="#e47c61" stroke="#f7f0dc" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="24" cy="36" r="3" fill="#11131d"/>
+  <circle cx="40" cy="36" r="3" fill="#11131d"/>
+  <path d="m28 45 4 3 4-3M32 43v5" fill="none" stroke="#11131d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M8 22h11M45 22h11" stroke="#ffd166" stroke-width="3" stroke-linecap="round"/>
+</svg>

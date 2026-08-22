@@ -1,0 +1,19 @@
+{
+  "name": "Smoke Break Cat: History Update",
+  "short_name": "Smoke Break Cat",
+  "description": "Run the street, dodge hazards, clear absurd smoke encounters, and build a permanent cat wardrobe.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#11131d",
+  "theme_color": "#11131d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
