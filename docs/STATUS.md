@@ -1,6 +1,6 @@
 # Production Status
 
-Last updated: 2026-08-21 (America/New_York)
+Last updated: 2026-08-22 (America/New_York)
 
 ## Live surfaces
 
@@ -37,6 +37,8 @@ Last updated: 2026-08-21 (America/New_York)
 - Added encounter focus lighting, pulsing floor auras, boss orbit chevrons, device glows/screens/bubbles, and puff-synchronized impact rings without changing encounter health, input cadence, or rewards.
 - Replaced global CSS skin filters with a bounded pose-aware recolor cache that changes only authored warm-fur pixels across neutral, run, jump, puff, and wardrobe frames while preserving eyes, muzzle, paws, nose, ink, tape, bandana, hats, and glasses.
 - Extracted warm-fur classification and luminance-preserving palette math into a tested rendering module with protected-color regression coverage.
+- Extracted a versioned save schema and guarded persistence adapter while retaining both historical browser keys. Existing saves migrate in place without changing progression, balance, cosmetics, mute state, or content mode.
+- Added independent corrupt-current/valid-legacy recovery, numeric and upgrade repair, forward-field preservation, equipped-cosmetic retention, blocked-storage session fallback, and portable JSON backup download/restore controls in the wardrobe.
 - Rebuilt the runtime city with inked silhouettes, brick texture, neon windows, fire escapes, cables, road damage, sprint streaks, and stronger lighting.
 - Reworked burst particles into distinct dust, spark, hit, heal, and loot shapes.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
@@ -75,11 +77,13 @@ Last updated: 2026-08-21 (America/New_York)
 - Animated wardrobe review of Calico, Blackout, Snowball, Neon, and Bone Cat extremes with preserved authored face details and unchanged cosmetic layers
 - 568×320 Tuxedo run, jump, ready, and recoil frames plus 390×844 run/encounter coverage through the pose-aware palette cache
 - Unit coverage proving ginger fur recolors while gold eyes, cream muzzle, pink nose, and black ink remain byte-identical
+- Fourteen-test suite covering defaults, legacy migration, corrupt-current recovery, partial/hostile repair, future-field preservation, current-save stability, storage failure, and portable backup round trips
+- Real existing-browser migration at 390×844 preserving 74 Ash, 294 m best, two air dodges, Tux ownership/equip state, and Original/Candy preference across repeated writes and reloads
 - GitHub Pages build and deployment workflow
 
 ## Next milestone
 
-Extract versioned save migration and progression behind tests, then add developer encounter shortcuts and visual snapshots before calling the full boss/device matrix covered.
+Extract progression rules behind tests, then add developer encounter shortcuts and visual snapshots before calling the full boss/device matrix covered.
 
 ## Known limitations
 
@@ -87,4 +91,5 @@ Extract versioned save migration and progression behind tests, then add develope
 - Skin recoloring is pose-aware and selective, but patterns remain compact code-native overlays rather than authored texture layers for every pose.
 - Encounter devices and sticks use production art; their loading fallback, gameplay-critical burn cues, collision-independent effects, hazard collision, and warning overlays intentionally remain code-native.
 - Browser automation currently covers the highest-risk paths, not the full boss/cosmetic matrix.
+- Portable backups are manual downloads; optional cloud synchronization is not part of the public-alpha scope.
 - The public web alpha should not be described as mobile-store ready.
