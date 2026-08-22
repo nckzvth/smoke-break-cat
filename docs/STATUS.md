@@ -29,6 +29,10 @@ Last updated: 2026-08-21 (America/New_York)
 - Added a four-frame encounter-action atlas with ready, anticipation, pull/bite recoil, and recovery phases; transformed prop/cosmetic sockets; rapid-input-safe cadence; and inked curl/sprinkle VFX.
 - Replaced all five procedural ground hazards and the floating loot placeholder with a measured six-sprite production atlas while preserving spawn timing, collision boxes, bobbing, rewards, and mode parity.
 - Replaced procedural crow, bat, and drone bodies with paired authored animation frames while preserving their wave paths, warning ribbons, low-swoop indicators, and collision geometry.
+- Repaired the cosmetic regression introduced by the generated character path: restored per-skin markings, corrected the Bone Cat renderer key, and moved eyewear/hats inside the pose-local transform so accessories follow run, jump, squash, recoil, and encounter animation.
+- Replaced all 22 non-default code-placeholder hats and glasses with two measured production-art atlases while retaining code-native loading fallbacks.
+- Added an animated closet loadout preview with safe preview-only handling for locked items and immediate persistent equip behavior for owned items.
+- Added overt non-character motion to neon signs, windows, moon glow, overhead wires, street steam, every ground-hazard class, aerial threat details, loot, and Original/Candy encounter devices.
 - Rebuilt the runtime city with inked silhouettes, brick texture, neon windows, fire escapes, cables, road damage, sprint streaks, and stronger lighting.
 - Reworked burst particles into distinct dust, spark, hit, heal, and loot shapes.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
@@ -56,16 +60,21 @@ Last updated: 2026-08-21 (America/New_York)
 - 390×844 live GitHub Pages start/run smoke test
 - 568×320 generated hydrant and iridescent puddle at gameplay scale with clean alpha, stable ground anchors, unchanged UI clearance, and no runtime errors
 - Source-atlas review for both aerial animation frames of the crow, bat, and drone plus deterministic PNG dimension, alpha, and byte-budget enforcement
+- 568×320 animated closet preview with Tuxedo skin markings plus generated Heartbreakers/Traffic Cone King preview-only combination
+- 390×844 animated closet preview and two-column cosmetic-card layout with generated 3D Disaster eyewear
+- 568×320 Tuxedo run and airborne frames with restored markings and clean pose-local rendering
+- Clean-browser wardrobe, preview, run, and ambient-motion smoke test with no warnings or errors
+- Deterministic PNG dimension, alpha, mapping-completeness, pose-local-rendering, and byte-budget enforcement for both cosmetic atlases
 - GitHub Pages build and deployment workflow
 
 ## Next milestone
 
-Finish the layered-character pipeline with explicit skin masks and pose-aligned cosmetic anchors, then replace the remaining procedural encounter devices using the same art direction. Save migration and progression extraction remain the next architecture targets.
+Replace the remaining procedural encounter-device bodies with production art, then finish explicit per-pose skin masks so colorways no longer depend on whole-image filters. Save migration and progression extraction remain the next architecture targets.
 
 ## Known limitations
 
 - The production runtime is still mostly the original single-file implementation.
-- Non-default skin recoloring is still filter-based; dedicated per-pose masks are needed for a final cosmetic pipeline.
-- Encounter props remain code-native and need the same production-art pass; hazard collision and warning overlays intentionally remain code-native.
+- Non-default skin base recoloring is still filter-based beneath the restored pattern layer; dedicated per-pose masks are needed for a final cosmetic pipeline.
+- Encounter props remain code-native, though their animation overlays are now active; hazard collision and warning overlays intentionally remain code-native.
 - Browser automation currently covers the highest-risk paths, not the full boss/cosmetic matrix.
 - The public web alpha should not be described as mobile-store ready.

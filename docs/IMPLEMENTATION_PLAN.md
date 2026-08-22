@@ -11,7 +11,7 @@ Turn the playable prototype into a reliable public web alpha on GitHub Pages, th
 - Build, validation, continuous integration, and Pages deployment workflows are installed.
 - The confirmed compact-layout and mid-encounter rotation blockers are repaired in the production entry point.
 - The first extracted module now owns the tested two-mode presentation registry, and Little Baby Idiot Mode covers every current encounter.
-- A generated character/VFX direction board defines the target silhouette, palette, layering, and effects language; identity-locked character cycles plus production ground, aerial, and loot atlases now implement that direction in the runtime.
+- A generated character/VFX direction board defines the target silhouette, palette, layering, and effects language; identity-locked character cycles plus production hazard, loot, eyewear, and hat atlases now implement that direction in the runtime, with accessories attached inside the active pose transform.
 - Full modularization, broader automated gameplay coverage, accessibility work, and visual production remain active roadmap items.
 
 ## Non-negotiable launch gates

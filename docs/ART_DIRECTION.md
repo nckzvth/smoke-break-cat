@@ -51,6 +51,8 @@ This board is a concept anchor, not a sprite atlas. Runtime poses are generated 
 | `public/assets/characters/street-cat-puff-cycle-v1.png` | Identity-preserving four-frame generation from the neutral pose; deterministic checkerboard-to-alpha cleanup; optimized project copy | Shipped 2×2 encounter-action atlas | `ed5659188f80eba76cf1aedbedb9730e79c9ad77232cc0240900bec704021144` |
 | `public/assets/hazards-ground-v1.png` | OpenAI built-in image generation; deterministic neutral-checkerboard-to-alpha cleanup; measured crop metadata; optimized project copy | Shipped 3×2 ground-hazard and loot atlas | `60a4f13eb3a621e6c5c96b049291b2ce138940f59c260a0f2858c1d33bcf72aa` |
 | `public/assets/hazards-flying-v1.png` | OpenAI built-in image generation; deterministic alpha extraction; measured crop metadata; optimized project copy | Shipped 3×2 two-frame aerial-hazard atlas | `5f6684c1f61253bd337668c379140475c066dac7f573bd398112130e206e190f` |
+| `public/assets/cosmetics-glasses-v1.png` | OpenAI built-in image generation; targeted cloth-removal edit; deterministic checkerboard-to-alpha cleanup; measured crop metadata | Shipped 4×3 atlas containing 11 eyewear cosmetics and one empty cell | `9691cc5eb957cde2601538cfd3cc57a0deed0a830929ebbc00c4f72d881a83f2` |
+| `public/assets/cosmetics-hats-v1.png` | OpenAI built-in image generation; deterministic color-mask expansion preserving dark outlines; measured crop metadata | Shipped 4×3 atlas containing 11 hat cosmetics and one empty cell | `a824a378122ae2d29aacff0c380915ec5109654ea3db82c582ca2c91032696a9` |
 
 Final generation prompt:
 
@@ -88,6 +90,14 @@ Aerial-hazard atlas:
 
 > Create exactly six isolated side-view game sprites in a strict 3-column by 2-row grid: crow facing left with wings up, crow facing left with wings down, bat facing left with wings up, bat facing left with wings down, compact street-surveillance drone level, and the same drone banking. Match the approved heavy-ink, limited-shading, grimy arcade style; keep animation pairs identity-locked, centered, and readable at phone scale with no labels, dividers, trails, floor, shadows, scenery, or extra objects.
 
+Eyewear atlas:
+
+> Create exactly eleven isolated side-view eyewear cosmetics in a strict 4-column by 3-row grid: midnight shades, brass rounds, coral hearts, acid-lime shield glasses, mint cyber visor, gold stars, battered goggles, brass monocle, cardboard 3D glasses, gold lightning lenses, and black laser visor. Leave the final cell empty. Match the approved heavy-ink, chipped screen-print finish; align every item for the right-facing cat; use genuine transparent alpha; include no cat parts, cloth, text, dividers, shadows, scenery, or extra objects.
+
+Hat atlas:
+
+> Create exactly eleven isolated side-view hat cosmetics in a strict 4-column by 3-row grid: dockworker beanie, battered trucker cap, outlaw cowboy hat, crooked wizard hat, chipped crown, dented bucket hat, devil horns, propeller beanie, halo, street-chef toque, and traffic-cone crown. Leave the final cell empty. Match the approved heavy-ink, chipped screen-print finish; align every item for the right-facing cat; use genuine transparent alpha; include no cat parts, text, dividers, shadows, scenery, or extra objects.
+
 The original individual poses required targeted background extraction because their first versions used baked checkerboards. The run-cycle generator also baked its checkerboard into the PNG; two constrained extraction edits still returned RGB files, so the shipped atlas uses a deterministic neutral-checkerboard-to-alpha conversion with softened antialiased edge pixels. The full-resolution generated originals remain unmodified outside the project copy.
 
 ## Runtime implementation
@@ -101,5 +111,8 @@ The original individual poses required targeted background extraction because th
 - Ground hazards now use measured atlas crops and bottom anchors so illustrated silhouettes replace the procedural placeholders without changing collision geometry. Puddle width, pigeon posture, and hydrant height deliberately exaggerate visual anticipation while preserving the original hit boxes.
 - Crows, bats, and drones alternate between two authored frames using the existing flap clock. Their collision rectangles, sine-wave paths, trajectory ribbons, and low-swoop warning remain deterministic and unchanged.
 - Floating loot uses the same production atlas, retaining the existing bob, aura, suspension hooks, reward rules, and headbutt collision contract.
+- Eyewear and hats now use separate production atlases with measured crops. They render inside the same foot-pivot transform as the active run, jump, landing, and encounter pose, so squash, rotation, and recoil cannot detach them from the cat.
+- Skin filters again receive distinct code-native markings on the generated sprite path. The Bone Cat renderer key is corrected, and the animated closet preview can display locked combinations without changing the equipped save.
+- Environmental motion now includes neon scan/flicker, breathing windows, street steam, swaying wires, a pulsing moon, type-specific ground-hazard motion, drone rotor/lights, orbiting loot sparks, and animated encounter-device embers/screens/bubbles.
 - The city renderer now uses inked building silhouettes, brick lines, neon windows, fire escapes, cables, road cracks, moon glow, sprint streaks, and a screen vignette.
 - Hats and glasses remain separate canvas layers. Skin palette filters are provisional until dedicated color masks or layered sprites replace them.
