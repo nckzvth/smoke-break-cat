@@ -27,6 +27,8 @@ Last updated: 2026-08-21 (America/New_York)
 - Replaced the binary neutral/gallop pose swap with a six-frame identity-locked run atlas, measured paw anchors, speed-limited frame timing, staged takeoff, velocity-aware airborne rotation, and landing recoil.
 - Attached every encounter prop to the cat's mouth through per-device sockets, moved puff/confetti emission to the mouth, and removed the duplicate encounter-pedestal prop.
 - Added a four-frame encounter-action atlas with ready, anticipation, pull/bite recoil, and recovery phases; transformed prop/cosmetic sockets; rapid-input-safe cadence; and inked curl/sprinkle VFX.
+- Replaced all five procedural ground hazards and the floating loot placeholder with a measured six-sprite production atlas while preserving spawn timing, collision boxes, bobbing, rewards, and mode parity.
+- Replaced procedural crow, bat, and drone bodies with paired authored animation frames while preserving their wave paths, warning ribbons, low-swoop indicators, and collision geometry.
 - Rebuilt the runtime city with inked silhouettes, brick texture, neon windows, fire escapes, cables, road damage, sprint streaks, and stronger lighting.
 - Reworked burst particles into distinct dust, spark, hit, heal, and loot shapes.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
@@ -52,16 +54,18 @@ Last updated: 2026-08-21 (America/New_York)
 - 568×320 live Original-to-Candy encounter switch with juice-box socket and outlined directional sprinkles
 - 390×844 active Candy bite/recoil after viewport rotation with aligned prop, cosmetic, and mouth-effect sockets
 - 390×844 live GitHub Pages start/run smoke test
+- 568×320 generated hydrant and iridescent puddle at gameplay scale with clean alpha, stable ground anchors, unchanged UI clearance, and no runtime errors
+- Source-atlas review for both aerial animation frames of the crow, bat, and drone plus deterministic PNG dimension, alpha, and byte-budget enforcement
 - GitHub Pages build and deployment workflow
 
 ## Next milestone
 
-Finish the layered-character pipeline with explicit skin masks and pose-aligned cosmetic anchors, then replace the remaining procedural hazards and encounter devices using the same art direction. Save migration and progression extraction remain the next architecture targets.
+Finish the layered-character pipeline with explicit skin masks and pose-aligned cosmetic anchors, then replace the remaining procedural encounter devices using the same art direction. Save migration and progression extraction remain the next architecture targets.
 
 ## Known limitations
 
 - The production runtime is still mostly the original single-file implementation.
 - Non-default skin recoloring is still filter-based; dedicated per-pose masks are needed for a final cosmetic pipeline.
-- Hazards and encounter props remain code-native and need the same production-art pass.
+- Encounter props remain code-native and need the same production-art pass; hazard collision and warning overlays intentionally remain code-native.
 - Browser automation currently covers the highest-risk paths, not the full boss/cosmetic matrix.
 - The public web alpha should not be described as mobile-store ready.

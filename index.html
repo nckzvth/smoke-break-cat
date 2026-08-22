@@ -235,12 +235,14 @@ import { CONTENT_MODE, assertCompleteCandyRegistry, normalizeContentMode, presen
 'use strict';
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const art={cat:new Image(),catRunCycle:new Image(),catPuffCycle:new Image(),catJump:new Image()};
+const art={cat:new Image(),catRunCycle:new Image(),catPuffCycle:new Image(),catJump:new Image(),hazardsGround:new Image(),hazardsFlying:new Image()};
 for(const image of Object.values(art)) image.decoding='async';
 art.cat.src='./assets/characters/street-cat-base-v1.png';
 art.catRunCycle.src='./assets/characters/street-cat-run-cycle-v2.png';
 art.catPuffCycle.src='./assets/characters/street-cat-puff-cycle-v1.png';
 art.catJump.src='./assets/characters/street-cat-jump-v1.png';
+art.hazardsGround.src='./assets/hazards-ground-v1.png';
+art.hazardsFlying.src='./assets/hazards-flying-v1.png';
 const $ = id => document.getElementById(id);
 const ui = {
   dist:$('distText'), ash:$('ashText'), packs:$('packText'), hearts:$('heartText'), phase:$('phaseText'), buff:$('buffText'), smoke:$('smokeCard'), cigFill:$('cigFill'), puffReadout:$('puffReadout'), toast:$('toast'),
@@ -858,7 +860,25 @@ function drawCat(x,y,t,smoking=false){
   else { drawGlasses(glasses,x+27,y-31);drawHat(hat,x+21,y-54,t); }
   if(smoking){const ratio=game.cigMax?game.cigHp/game.cigMax:1,mouth=catMouthSocket();drawSmokeHeld(game.smokeable,mouth.x,mouth.y,ratio);}
 }
-function drawObstacle(o){ ctx.save(); if(o.type==='can'){ roundRect(o.x,o.y,o.w,o.h,5,'#171820'); ctx.fillStyle='#6e7584'; ctx.fillRect(o.x+3,o.y+5,o.w-6,o.h-5); ctx.fillStyle='#aeb3bd'; ctx.fillRect(o.x,o.y+2,o.w,5); ctx.fillStyle='#252833'; ctx.fillRect(o.x+8,o.y+12,4,18); }
+const GROUND_HAZARD_SPRITES={
+  can:{frame:0,b:[121,87,185,274],width:42},cone:{frame:1,b:[82,81,230,287],width:48},hydrant:{frame:2,b:[55,63,216,304],width:48},
+  puddle:{frame:3,b:[81,153,288,99],width:72},pigeon:{frame:4,b:[42,62,295,198],width:58},box:{frame:5,b:[47,61,231,187],width:58}
+};
+const FLYING_HAZARD_SPRITES={
+  crow:[{frame:0,b:[56,25,307,317],width:54},{frame:1,b:[49,183,317,159],width:54}],
+  bat:[{frame:2,b:[24,71,310,250],width:52},{frame:3,b:[90,69,266,163],width:52}],
+  drone:[{frame:4,b:[61,107,271,136],width:58},{frame:5,b:[48,101,258,151],width:58}]
+};
+function imageReady(image){ return image.complete&&image.naturalWidth>0; }
+function drawCroppedAtlas(image,spec,cx,anchorY,centered=false){
+  const cellW=image.naturalWidth/3,cellH=image.naturalHeight/2,[bx,by,bw,bh]=spec.b;
+  const sx=(spec.frame%3)*cellW+bx,sy=Math.floor(spec.frame/3)*cellH+by,dw=spec.width,dh=dw*bh/bw;
+  ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(image,sx,sy,bw,bh,cx-dw/2,centered?anchorY-dh/2:anchorY-dh,dw,dh);
+}
+function drawObstacle(o){ ctx.save();
+  if(imageReady(art.hazardsGround)){drawCroppedAtlas(art.hazardsGround,GROUND_HAZARD_SPRITES[o.type],o.x+o.w/2,o.y+o.h);ctx.restore();return;}
+  if(o.type==='can'){ roundRect(o.x,o.y,o.w,o.h,5,'#171820'); ctx.fillStyle='#6e7584'; ctx.fillRect(o.x+3,o.y+5,o.w-6,o.h-5); ctx.fillStyle='#aeb3bd'; ctx.fillRect(o.x,o.y+2,o.w,5); ctx.fillStyle='#252833'; ctx.fillRect(o.x+8,o.y+12,4,18); }
   else if(o.type==='cone'){ ctx.fillStyle='#f47a42'; ctx.beginPath(); ctx.moveTo(o.x+16,o.y); ctx.lineTo(o.x+30,o.y+o.h); ctx.lineTo(o.x+2,o.y+o.h); ctx.closePath(); ctx.fill(); ctx.fillStyle='#f5e7c6'; ctx.fillRect(o.x+7,o.y+16,18,5); ctx.fillStyle='#15161d'; ctx.fillRect(o.x,o.y+o.h-4,32,6); }
   else if(o.type==='puddle'){ ctx.fillStyle='#4f6ea7'; ctx.globalAlpha=.65; ctx.beginPath(); ctx.ellipse(o.x+31,o.y+6,31,8,0,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; ctx.fillStyle='#8db6cf'; ctx.fillRect(o.x+10,o.y+3,20,2); }
   else if(o.type==='hydrant'){ ctx.fillStyle='#7f2e35'; ctx.fillRect(o.x+8,o.y+7,18,o.h-7); ctx.fillStyle='#d64f57'; ctx.fillRect(o.x+5,o.y+12,24,8); ctx.fillStyle='#b63d45'; ctx.fillRect(o.x+10,o.y+2,14,8); ctx.fillStyle='#d9b36b'; ctx.fillRect(o.x+2,o.y+15,5,7); ctx.fillRect(o.x+29,o.y+15,5,7); ctx.fillStyle='#202128'; ctx.fillRect(o.x+7,o.y+o.h-4,20,4); }
@@ -869,6 +889,7 @@ function drawFlying(f){
   // Trajectory ribbon + low-swoop warning: readable from across the screen.
   ctx.globalAlpha=.18;ctx.strokeStyle=danger?'#ff7b72':(f.type==='drone'?'#80e1c1':'#d7cbff');ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.beginPath();for(let i=0;i<80;i+=8){const px=-i,ph=f.phase-i*.012*f.freq,py=Math.sin(ph)*f.amp+Math.sin(ph*.47+f.wave2)*f.amp*.14-(Math.sin(f.phase)*f.amp+Math.sin(f.phase*.47+f.wave2)*f.amp*.14);i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
   if(danger){ctx.fillStyle='#ff7b72';ctx.font='1000 12px ui-monospace,monospace';ctx.fillText('!',-11,-10);}
+  if(imageReady(art.hazardsFlying)){const frames=FLYING_HAZARD_SPRITES[f.type],spec=frames[Math.sin(f.flap)>=0?0:1];drawCroppedAtlas(art.hazardsFlying,spec,f.w/2,f.h/2,true);ctx.restore();return;}
   if(f.type==='drone'){ctx.fillStyle='#202633';ctx.fillRect(6,6,28,13);ctx.fillStyle='#80e1c1';ctx.fillRect(12,10,14,4);ctx.fillStyle='#ff5f57';ctx.fillRect(30,8,4,4);ctx.strokeStyle='#a4adbf';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(2,6);ctx.lineTo(10,2);ctx.moveTo(30,2);ctx.lineTo(39,6);ctx.moveTo(2,19);ctx.lineTo(10,23);ctx.moveTo(30,23);ctx.lineTo(39,19);ctx.stroke();}
   else if(f.type==='crow'){ctx.fillStyle='#16171e';ctx.beginPath();ctx.ellipse(18,13,15,8,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#555967';ctx.beginPath();ctx.arc(31,9,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f0c55b';ctx.beginPath();ctx.moveTo(36,9);ctx.lineTo(45,12);ctx.lineTo(36,14);ctx.closePath();ctx.fill();const wing=Math.sin(f.flap)*9;ctx.strokeStyle='#0e0f14';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(15,13);ctx.quadraticCurveTo(4,-2-wing,0,12);ctx.moveTo(22,13);ctx.quadraticCurveTo(35,-2+wing,42,11);ctx.stroke();}
   else {ctx.fillStyle='#34253f';ctx.beginPath();ctx.ellipse(19,13,11,7,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b388ff';ctx.fillRect(17,8,3,3);const wing=Math.sin(f.flap)*10;ctx.strokeStyle='#6c4a80';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(14,12);ctx.quadraticCurveTo(1,-4-wing,-5,12);ctx.moveTo(24,12);ctx.quadraticCurveTo(37,-4+wing,45,12);ctx.stroke();}
@@ -879,6 +900,7 @@ function drawBox(b){
   // Reward boxes are bright floating SMOKE MART capsules. Ground hazards are never this silhouette/color language.
   ctx.globalAlpha=.18;ctx.fillStyle='#ffd166';ctx.beginPath();ctx.arc(cx,cy,28,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
   ctx.strokeStyle='#6b6d79';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx-9,y-22);ctx.lineTo(cx-9,y-5);ctx.moveTo(cx+9,y-22);ctx.lineTo(cx+9,y-5);ctx.stroke();
+  if(imageReady(art.hazardsGround)){drawCroppedAtlas(art.hazardsGround,GROUND_HAZARD_SPRITES.box,cx,cy,true);ctx.fillStyle='#f7f0dc';ctx.fillRect(b.x-7,y+4,3,3);ctx.fillRect(b.x+b.w+5,y+11,3,3);ctx.restore();return;}
   ctx.fillStyle='#ffd166';ctx.fillRect(b.x-2,y-2,b.w+4,b.h+4);ctx.fillStyle='#172432';ctx.fillRect(b.x+2,y+2,b.w-4,b.h-4);ctx.fillStyle='#80e1c1';ctx.fillRect(b.x+5,y+5,b.w-10,b.h-10);
   ctx.fillStyle='#11131d';ctx.font='1000 18px ui-monospace,monospace';ctx.textAlign='center';ctx.fillText('?',cx,y+19);ctx.font='700 6px ui-monospace,monospace';ctx.fillText('LOOT',cx,y+25);ctx.textAlign='left';
   ctx.fillStyle='#f7f0dc';ctx.fillRect(b.x-7,y+4,3,3);ctx.fillRect(b.x+b.w+5,y+11,3,3);ctx.restore();
