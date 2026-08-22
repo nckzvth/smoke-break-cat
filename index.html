@@ -87,7 +87,9 @@
   .closetSection { margin:12px 0 18px; }
   .closetSection h3 { margin:0 0 8px; font-size:14px; letter-spacing:.08em; }
   .cosGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
-  .cosCard { min-height:88px; text-align:left; color:var(--ui); background:#1c2233; border:2px solid #ffffff12; box-shadow:none; padding:9px; border-radius:12px; }
+  .cosCard { min-height:96px; display:grid; grid-template-columns:68px minmax(0,1fr); gap:8px; align-items:center; text-align:left; color:var(--ui); background:#1c2233; border:2px solid #ffffff12; box-shadow:none; padding:7px; border-radius:12px; overflow:hidden; }
+  .cosThumb { display:block; width:68px; height:58px; border-radius:8px; background:#111522; box-shadow:inset 0 0 0 1px #ffffff12; }
+  .cosCopy { min-width:0; }
   .cosCard .name { font-size:12px; font-weight:1000; margin-bottom:5px; }
   .cosCard .how { font-size:10px; line-height:1.35; opacity:.67; font-weight:600; }
   .cosCard.unlocked { border-color:#80e1c166; }
@@ -283,7 +285,7 @@
 <script type="module">
 import { CONTENT_MODE, assertCompleteCandyRegistry, presentEncounter, toggleContentMode } from './src/content/content-modes.js';
 import { UPGRADE_RULES, baseMaxHearts, bossIndexForEncounter, bossPackReward, boxAshReward, boxRewardFromRoll, criticalChance, currentLevel, encounterAshReward, encounterMaxHp, hotStartRatio, meetsUnlockCondition, nextComboMultiplier, passiveDps, streetEncounterIndex, tapPower, upgradeCost } from './src/game/progression.js';
-import { drawCodeCat, drawTitleMascot, drawWardrobeMascot } from './src/rendering/code-art.js';
+import { drawCodeCat, drawCosmeticThumbnail, drawTitleMascot, drawWardrobeMascot } from './src/rendering/code-art.js';
 import { SAVE_VERSION, loadStoredSave, parseSaveBackup, serializeSaveBackup, writeStoredSave } from './src/state/save-schema.js';
 
 (() => {
@@ -510,7 +512,7 @@ function updatePreviewCopy(){
 }
 function renderWardrobe(){
   if(!ui.skinGrid) return; ui.closetStats.innerHTML=`PACKS <b>${Math.floor(save.packs)}</b><br>BEST <b>${Math.floor(save.best)} m</b> · BOSSES <b>${save.bosses}</b><br>BOXES <b>${save.stats.boxesOpened}</b> · AIR DODGES <b>${save.stats.nearMisses}</b>`;
-  const render=(arr,grid)=>{ grid.innerHTML=''; arr.forEach(item=>{ const b=document.createElement('button'); const owned=ownsCosmetic(item.id); const cat=cosmeticCategory(item.id); const eq=save.cosmetics.equipped[cat]===item.id; b.className=`cosCard ${owned?'unlocked':'locked'} ${eq?'equipped':''} ${item.source?.type==='pack'?'pack':''}`; b.innerHTML=`<div class="name">${modeCopy(item.name)}</div><div class="how">${sourceText(item)}</div>`; const preview=()=>selectWardrobePreview(item); b.addEventListener('pointerenter',preview); b.addEventListener('focus',preview); bindTap(b,()=>{preview();activateCosmetic(item);}); grid.appendChild(b); }); };
+  const render=(arr,grid)=>{ grid.innerHTML=''; arr.forEach((item,index)=>{ const b=document.createElement('button'),thumb=document.createElement('canvas'); const owned=ownsCosmetic(item.id),cat=cosmeticCategory(item.id),eq=save.cosmetics.equipped[cat]===item.id; b.className=`cosCard ${owned?'unlocked':'locked'} ${eq?'equipped':''} ${item.source?.type==='pack'?'pack':''}`; thumb.className='cosThumb';thumb.width=136;thumb.height=116;thumb.setAttribute('aria-hidden','true');const copy=document.createElement('div');copy.className='cosCopy';copy.innerHTML=`<div class="name">${modeCopy(item.name)}</div><div class="how">${sourceText(item)}</div>`;b.append(thumb,copy);const equippedSkin=cosmeticItem(save.cosmetics.equipped.skin)||COSMETICS.skins[0],loadout={skin:cat==='skin'?item:equippedSkin,glasses:cat==='glasses'?item.style:'none',hat:cat==='hat'?item.style:'none'};drawCosmeticThumbnail(thumb,index*.13,loadout); const preview=()=>selectWardrobePreview(item); b.addEventListener('pointerenter',preview); b.addEventListener('focus',preview); bindTap(b,()=>{preview();activateCosmetic(item);}); grid.appendChild(b); }); };
   render(COSMETICS.skins,ui.skinGrid); render(COSMETICS.glasses,ui.glassesGrid); render(COSMETICS.hats,ui.hatGrid);
   updatePreviewCopy();
 }
@@ -635,7 +637,7 @@ function spawnBox(){
 function burst(x,y,type,n){ for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*190,vy:-Math.random()*180-20,life:.35+Math.random()*.4,t:0,type,s:2+Math.random()*5}); }
 function catMouthSocket(){
   const recoil=game.state==='smoke'&&cat.puffTime>0?Math.sin(Math.min(1,(.34-cat.puffTime)/.34)*Math.PI)*3:0;
-  return {x:cat.x+51+recoil,y:cat.y-29-recoil*.45};
+  return {x:cat.x+35+recoil*.74,y:cat.y-21-recoil*.34};
 }
 function smokeBurst(n){ const mouth=catMouthSocket(); for(let i=0;i<n;i++) smokePuffs.push({x:mouth.x+8+Math.random()*6,y:mouth.y-2+Math.random()*4,vx:28+Math.random()*28,vy:-25-Math.random()*34,life:.8+Math.random()*.7,t:0,s:3+Math.random()*7,rot:Math.random()*Math.PI*2,spin:(Math.random()-.5)*3,curl:.7+Math.random()*.8,hue:Math.random()*360}); }
 
@@ -981,7 +983,7 @@ function drawSpriteSkinMarks(skin,eye,t){
 function drawCat(x,y,t,smoking=false){
   const skin=cosmeticItem(save.cosmetics.equipped.skin)||COSMETICS.skins[0],glasses=cosmeticItem(save.cosmetics.equipped.glasses)?.style||'none',hat=cosmeticItem(save.cosmetics.equipped.hat)?.style||'none';
   const blink=game.inv>0&&Math.floor(game.inv*16)%2===0,puff=smoking&&cat.puffTime>0?Math.sin(Math.min(1,(.34-cat.puffTime)/.34)*Math.PI):0;
-  drawCodeCat(ctx,x,y,t,{skin,glasses,hat,run:cat.frame,airborne:!cat.onGround,airTilt:Math.max(-.12,Math.min(.09,cat.vy/4200)),puff,smoking,ghost:game.ghostTime>0,alpha:(blink?.28:1)*(game.ghostTime>0?.76:1),sprint:game.sprintActive});
+  drawCodeCat(ctx,x,y,t,{skin,glasses,hat,scale:.82,pose:smoking?'puff':!cat.onGround?'jump':'run',run:cat.frame,airborne:!cat.onGround,airTilt:Math.max(-.12,Math.min(.09,cat.vy/4200)),puff,smoking,ghost:game.ghostTime>0,alpha:(blink?.28:1)*(game.ghostTime>0?.76:1),sprint:game.sprintActive});
   if(smoking){const ratio=game.cigMax?game.cigHp/game.cigMax:1,mouth=catMouthSocket();drawSmokeHeld(game.smokeable,mouth.x,mouth.y,ratio);}
 }
 const GROUND_HAZARD_SPRITES={

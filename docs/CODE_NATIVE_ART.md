@@ -9,6 +9,7 @@ The generated-raster direction is rejected. The shipping game returns to the pro
 Smoke Break Cat is a thick-ink midnight sticker cartoon about one permanently unimpressed street gremlin. The mascot must be recognizable from its silhouette alone:
 
 - long horizontal body and question-mark tail;
+- chunky ribcage, grounded haunches, connected chest, and readable front/back paws;
 - oversized angular head and ears;
 - hostile yellow eyes with heavy brows;
 - cream muzzle, pink nose, one stupid snaggletooth;
@@ -24,6 +25,8 @@ The cat is ugly-cute by design. Awkwardness is allowed when it makes the express
 - Skins change the same body through color, patches, stripes, bones, or glow; they never replace the cat's face or silhouette.
 - Equippables anchor inside the cat's local head transform and remain readable at phone scale.
 - Animate shape transforms, limbs, tails, brows, glow, and accessory parts directly in canvas.
+- Use authored idle, run, airborne, and puff poses. A pose must change limb placement and weight, not merely rotate the whole mascot.
+- Every wardrobe card must show a code-drawn thumbnail so the visual reward is legible before it is unlocked or equipped.
 - Original and Little Baby Idiot props share timing, sockets, scale, and gameplay rules.
 - Do not ship generated character, cosmetic, hazard, loot, or encounter-device raster atlases.
 
