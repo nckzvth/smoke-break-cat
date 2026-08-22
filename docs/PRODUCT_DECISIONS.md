@@ -33,10 +33,10 @@ The web build will prepare for a future port by:
 
 ## Visual-production position
 
-Generated imagery is appropriate for concept boards, character references, backgrounds, prop exploration, and marketing art. Final UI, typography, collision shapes, and timing-sensitive animated VFX stay code-native. Final character assets should be layered and derived from one approved reference so animation and cosmetics remain consistent.
+The generated-raster direction is rejected for the game. The shipping identity is the prototype's thick-ink canvas style, rebuilt through one shared code-native mascot and accessory system. Skins preserve the same face and silhouette; hats and glasses stay anchored inside the same local transform. Generated character, cosmetic, hazard, loot, and encounter-device atlases are not approved shipping assets.
 
 ## Rights and branding
 
 - No open-source license is granted until the owner chooses one.
-- All generated and third-party assets must receive a source/provenance entry before shipping.
-- Real-world brand references, including the current “Lucky Strike” upgrade name, require removal, replacement, or explicit clearance before a broader public launch.
+- Any future third-party asset must receive a source/provenance entry and explicit approval before shipping.
+- Real-world brand references are not approved content; the former “Lucky Strike” upgrade name was replaced with the fictional “Lucky Rip.”

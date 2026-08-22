@@ -11,9 +11,9 @@ Turn the playable prototype into a reliable public web alpha on GitHub Pages, th
 - Build, validation, continuous integration, and Pages deployment workflows are installed.
 - The confirmed compact-layout and mid-encounter rotation blockers are repaired in the production entry point.
 - The first extracted module now owns the tested two-mode presentation registry, and Little Baby Idiot Mode covers every current encounter.
-- A generated character/VFX direction board defines the target silhouette, palette, layering, and effects language; identity-locked character cycles plus production hazard, loot, eyewear, hat, and paired Original/Candy encounter-device atlases now implement that direction in the runtime.
+- The generated-raster direction was rejected. The Gremlin Cut restores the prototype's thick-ink canvas identity through one shared code-native mascot, skin, and equippable system; generated character, cosmetic, hazard, loot, and encounter atlases have been removed.
 - Full modularization, broader automated gameplay coverage, accessibility work, and visual snapshot automation remain active roadmap items.
-- The visual-overhaul slice now covers the hero, run/action animation, pose-aware skin recoloring, hazards, loot, cosmetics, environment motion, encounter staging, and every encounter prop.
+- The current visual slice covers the shared code-drawn hero, run/action transforms, twelve pattern-aware skins, twenty-two equippables, procedural hazards/loot, environment motion, encounter staging, and every Original/Candy prop.
 - Versioned save migration, corrupt-save recovery, storage-failure fallback, and manual JSON backup/restore are implemented behind a tested adapter while preserving both historical browser keys.
 - Progression costs, combat power, encounter health/rewards, loot boundaries, boss cadence, and unlock conditions now live in one deterministic tested module. A query-gated, session-only lab reaches every boss, street encounter, presentation mode, and cosmetic without touching the real save.
 
@@ -93,10 +93,10 @@ Exit criteria:
 
 Deliverables:
 
-- Approve one art-direction board before producing final assets.
-- Use generated raster art for concept exploration, character references, environmental plates, props, and marketing art.
-- Build final characters as layered, reusable assets so skins, glasses, hats, animation, and content modes remain consistent.
-- Keep UI, typography, collision geometry, and most animated VFX deterministic and code-native.
+- Maintain the approved Gremlin Cut code-native art contract.
+- Keep the same recognizable cat silhouette and face across title, gameplay, encounters, and wardrobe preview.
+- Build skins, glasses, hats, animation, and content modes as layered reusable canvas drawing functions.
+- Keep UI, typography, collision geometry, environmental props, and animated VFX deterministic and code-native.
 - Replace placeholder-feeling character rendering, backgrounds, smoke devices, enemies, impacts, smoke, sparks, dust, motion streaks, and encounter staging.
 
 Exit criteria:

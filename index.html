@@ -8,14 +8,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="theme-color" content="#11131d" />
 <meta name="description" content="A web-first arcade runner about a street cat, absurd smoke encounters, and permanent cosmetic progression." />
-<meta property="og:title" content="Smoke Break Cat: History Update" />
+<meta property="og:title" content="Smoke Break Cat: Gremlin Cut" />
 <meta property="og:description" content="Run the street, dodge hazards, clear ridiculous smoke encounters, and build a permanent cat wardrobe." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://nckzvth.github.io/smoke-break-cat/" />
 <link rel="canonical" href="https://nckzvth.github.io/smoke-break-cat/" />
 <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
 <link rel="manifest" href="./site.webmanifest" />
-<title>SMOKE BREAK CAT: HISTORY UPDATE</title>
+<title>SMOKE BREAK CAT: GREMLIN CUT</title>
 <style>
   :root { --ui:#f7f0dc; --ink:#11131d; --hot:#ff5f57; --mint:#80e1c1; --gold:#ffd166; --vio:#b388ff; --red:#ff7b72; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
@@ -64,7 +64,7 @@
   .close { width:100%; margin-top:10px; background:#ff7b72; }
   #startScreen { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:22px; background:linear-gradient(#13162a55,#090a12e6); pointer-events:auto; }
   .startCard { width:min(640px,92vw); color:var(--ui); text-align:center; background:#11131ddd; border:2px solid #ffffff24; border-radius:24px; padding:22px 18px; box-shadow:0 18px 70px #000a; }
-  #titleCat { display:block; width:min(210px,48vw); height:122px; object-fit:contain; margin:-14px auto -5px; filter:drop-shadow(0 9px 0 #05060a88); }
+  #titleCat { display:block; width:min(270px,72vw); height:157px; object-fit:contain; margin:-22px auto -12px; filter:drop-shadow(0 9px 0 #05060a88); }
   .logo { font-weight:1000; font-size:clamp(34px,10vw,64px); line-height:.85; letter-spacing:-.08em; transform:skew(-3deg); }
   .logo span { color:#ffd166; }
   .tag { margin:14px auto 18px; opacity:.75; max-width:520px; line-height:1.45; font-size:13px; }
@@ -209,9 +209,9 @@
 
   <div id="startScreen">
     <div class="startCard">
-      <img id="titleCat" src="./assets/characters/street-cat-base-v1.png" alt="" aria-hidden="true" />
+      <canvas id="titleCat" width="420" height="244" aria-label="Animated code-drawn street cat mascot"></canvas>
       <div class="logo" id="gameLogo">SMOKE<br><span>BREAK</span> CAT</div>
-      <div class="tag" id="startTag">THE HISTORY UPDATE. Build a ridiculous permanent wardrobe, hunt rare street drops, flex boss cosmetics, and use sprint timing to bully the newly-fair air hazards.</div>
+      <div class="tag" id="startTag">THE GREMLIN CUT. One furious street cat. 36 stupid hats. Infinite bad decisions. Run, dodge, headbutt contraband, and humiliate gigantic smoking appliances.</div>
       <button id="startBtn">TAP TO START + SOUND</button>
       <button id="startStyleBtn" style="width:100%;margin-top:9px;background:#b388ff;">CAT CLOSET</button>
       <button class="modeToggle" id="startModeBtn" style="margin-top:9px;">LITTLE BABY IDIOT MODE: OFF</button>
@@ -266,7 +266,7 @@
         <div class="branch active">
           <h3 id="activeTitle">ACTIVE SMOKING</h3>
           <button class="upgrade" data-up="bigDrag"><div class="uTop"><span>BIG DRAG</span><span></span></div><div class="desc">Each manual puff burns more.</div></button>
-          <button class="upgrade" data-up="crit"><div class="uTop"><span>LUCKY STRIKE</span><span></span></div><div class="desc">Chance for a massive critical puff.</div></button>
+          <button class="upgrade" data-up="crit"><div class="uTop"><span>LUCKY RIP</span><span></span></div><div class="desc">Chance for a massive critical puff.</div></button>
           <button class="upgrade" data-up="combo"><div class="uTop"><span>CHAIN PULL</span><span></span></div><div class="desc">Fast taps build a temporary multiplier.</div></button>
         </div>
         <div class="branch meta">
@@ -283,7 +283,7 @@
 <script type="module">
 import { CONTENT_MODE, assertCompleteCandyRegistry, presentEncounter, toggleContentMode } from './src/content/content-modes.js';
 import { UPGRADE_RULES, baseMaxHearts, bossIndexForEncounter, bossPackReward, boxAshReward, boxRewardFromRoll, criticalChance, currentLevel, encounterAshReward, encounterMaxHp, hotStartRatio, meetsUnlockCondition, nextComboMultiplier, passiveDps, streetEncounterIndex, tapPower, upgradeCost } from './src/game/progression.js';
-import { recolorFurPixel, skinRgb } from './src/rendering/skin-palette.js';
+import { drawCodeCat, drawTitleMascot, drawWardrobeMascot } from './src/rendering/code-art.js';
 import { SAVE_VERSION, loadStoredSave, parseSaveBackup, serializeSaveBackup, writeStoredSave } from './src/state/save-schema.js';
 
 (() => {
@@ -291,17 +291,6 @@ import { SAVE_VERSION, loadStoredSave, parseSaveBackup, serializeSaveBackup, wri
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const art={cat:new Image(),catRunCycle:new Image(),catPuffCycle:new Image(),catJump:new Image(),hazardsGround:new Image(),hazardsFlying:new Image(),cosmeticsGlasses:new Image(),cosmeticsHats:new Image(),smokeablesOriginal:new Image(),smokeablesCandy:new Image()};
-for(const image of Object.values(art)) image.decoding='async';
-art.cat.src='./assets/characters/street-cat-base-v1.png';
-art.catRunCycle.src='./assets/characters/street-cat-run-cycle-v2.png';
-art.catPuffCycle.src='./assets/characters/street-cat-puff-cycle-v1.png';
-art.catJump.src='./assets/characters/street-cat-jump-v1.png';
-art.hazardsGround.src='./assets/hazards-ground-v1.png';
-art.hazardsFlying.src='./assets/hazards-flying-v1.png';
-art.cosmeticsGlasses.src='./assets/cosmetics-glasses-v1.png';
-art.cosmeticsHats.src='./assets/cosmetics-hats-v1.png';
-art.smokeablesOriginal.src='./assets/smokeables-original-v1.png';
-art.smokeablesCandy.src='./assets/smokeables-candy-v1.png';
 const $ = id => document.getElementById(id);
 const ui = {
   dist:$('distText'), ash:$('ashText'), packs:$('packText'), hearts:$('heartText'), phase:$('phaseText'), buff:$('buffText'), smoke:$('smokeCard'), cigFill:$('cigFill'), puffReadout:$('puffReadout'), toast:$('toast'),
@@ -434,11 +423,11 @@ function syncContentModeUI(){
   const candy=isCandyMode();
   $('wrap').classList.toggle('candy-mode',candy);
   document.documentElement.dataset.contentMode=save.contentMode;
-  document.title=candy?'SNACK BREAK CAT: LITTLE BABY IDIOT MODE':'SMOKE BREAK CAT: HISTORY UPDATE';
+  document.title=candy?'SNACK BREAK CAT: LITTLE BABY IDIOT MODE':'SMOKE BREAK CAT: GREMLIN CUT';
   const toggleLabel=`LITTLE BABY IDIOT MODE: ${candy?'ON':'OFF'}`;
   ui.startMode.textContent=toggleLabel; ui.closetMode.textContent=toggleLabel;
   ui.logo.innerHTML=candy?'SNACK<br><span>BREAK</span> CAT':'SMOKE<br><span>BREAK</span> CAT';
-  ui.startTag.textContent=candy?'THE SUGARCOATED UPDATE. Build a ridiculous permanent wardrobe, hunt rare street candy, flex boss cosmetics, and bully air hazards with a completely irresponsible sugar rush.':'THE HISTORY UPDATE. Build a ridiculous permanent wardrobe, hunt rare street drops, flex boss cosmetics, and use sprint timing to bully the newly-fair air hazards.';
+  ui.startTag.textContent=candy?'THE SUGAR GREMLIN CUT. One furious street cat. 36 stupid hats. Infinite bad decisions. Run, dodge, headbutt candy, and humiliate gigantic dessert appliances.':'THE GREMLIN CUT. One furious street cat. 36 stupid hats. Infinite bad decisions. Run, dodge, headbutt contraband, and humiliate gigantic smoking appliances.';
   ui.startTiny.textContent=candy?'Tap anywhere to jump. Hold SPRINT (or Shift) to surge forward. Cosmetics, SPRINKLES, PACKS, achievements and equipped style persist on this device.':'Tap anywhere to jump. Hold SPRINT (or Shift) to surge forward and change flyer timing. Cosmetics, Ash, PACKS, achievements and equipped style persist on this device.';
   ui.closetSub.textContent=candy?'36 cosmetics. Earn them by running stupidly far, eating everything, bullying candy bosses, cracking loot, threading flyers, finding rare drops, or spending PACKS.':'36 cosmetics. Earn them by running stupidly far, smoking everything, bullying bosses, cracking loot, threading flyers, finding rare drops, or spending PACKS.';
   ui.shopTitle.textContent=candy?'SNACKING DISCIPLINES':'SMOKING DISCIPLINES';
@@ -645,8 +634,8 @@ function spawnBox(){
 }
 function burst(x,y,type,n){ for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*190,vy:-Math.random()*180-20,life:.35+Math.random()*.4,t:0,type,s:2+Math.random()*5}); }
 function catMouthSocket(){
-  if(game.state==='smoke'&&art.catPuffCycle.complete&&art.catPuffCycle.naturalWidth){ const frame=encounterFrameState(),mouth=transformEncounterOffset(frame,encounterMouthOffset(frame)); return {x:cat.x+mouth.x,y:cat.y+26+mouth.y}; }
-  return {x:cat.x+43,y:cat.y-7};
+  const recoil=game.state==='smoke'&&cat.puffTime>0?Math.sin(Math.min(1,(.34-cat.puffTime)/.34)*Math.PI)*3:0;
+  return {x:cat.x+51+recoil,y:cat.y-29-recoil*.45};
 }
 function smokeBurst(n){ const mouth=catMouthSocket(); for(let i=0;i<n;i++) smokePuffs.push({x:mouth.x+8+Math.random()*6,y:mouth.y-2+Math.random()*4,vx:28+Math.random()*28,vy:-25-Math.random()*34,life:.8+Math.random()*.7,t:0,s:3+Math.random()*7,rot:Math.random()*Math.PI*2,spin:(Math.random()-.5)*3,curl:.7+Math.random()*.8,hue:Math.random()*360}); }
 
@@ -892,16 +881,8 @@ function drawHat(style,x,y,t=0,target=ctx,width=null){
   target.restore();
 }
 function renderWardrobePreview(t){
-  if(!ui.closetPreview||ui.closet.style.display!=='block'||!imageReady(art.cat))return;const p=ui.closetPreview.getContext('2d'),w=ui.closetPreview.width,h=ui.closetPreview.height,skin=cosmeticItem(wardrobePreview.skin)||COSMETICS.skins[0],glasses=cosmeticItem(wardrobePreview.glasses)?.style||'none',hat=cosmeticItem(wardrobePreview.hat)?.style||'none';
-  p.clearRect(0,0,w,h);p.save();p.globalAlpha=.18;p.strokeStyle='#b388ff';p.lineWidth=3;for(let i=0;i<5;i++){const x=(i*157+t*36)%760-60;p.beginPath();p.moveTo(x,34+i*37);p.lineTo(x+72,34+i*37);p.stroke();}p.restore();
-  p.fillStyle='#08090e';p.fillRect(0,h-42,w,8);p.fillStyle='#3c3d49';p.fillRect(0,h-34,w,34);p.fillStyle='#ffd166';for(let x=-((t*90)%150);x<w;x+=150)p.fillRect(x,h-17,78,4);
-  const bob=Math.sin(t*3.2)*3,dx=72,dy=40+bob,dw=300,dh=200;p.save();drawSkinnedSprite(p,art.cat,skin,0,0,art.cat.naturalWidth,art.cat.naturalHeight,dx,dy,dw,dh,'closet');p.globalAlpha=.76;
-  if(skin.pattern==='tux'){p.fillStyle='#f7f0dc';p.beginPath();p.moveTo(dx+190,dy+116);p.lineTo(dx+225,dy+130);p.lineTo(dx+205,dy+168);p.lineTo(dx+177,dy+147);p.closePath();p.fill();}
-  else if(skin.pattern==='calico'||skin.pattern==='tortie'){p.fillStyle=skin.pattern==='calico'?'#272831':'#c95e35';for(const [ox,oy,r] of [[120,118,20],[172,150,16],[219,74,12]]){p.beginPath();p.arc(dx+ox,dy+oy,r,0,Math.PI*2);p.fill();}}
-  else if(skin.pattern==='tabby'||skin.pattern==='tiger'){p.strokeStyle=skin.pattern==='tiger'?'#24191a':'#493e3a';p.lineWidth=7;for(let i=0;i<3;i++){p.beginPath();p.moveTo(dx+105+i*35,dy+105);p.lineTo(dx+121+i*35,dy+126);p.stroke();}}
-  else if(skin.pattern==='skeleton'){p.strokeStyle='#eee8d7';p.lineWidth=6;p.beginPath();p.moveTo(dx+157,dy+104);p.lineTo(dx+157,dy+165);for(let i=0;i<3;i++){p.moveTo(dx+157,dy+117+i*15);p.lineTo(dx+123,dy+127+i*15);p.moveTo(dx+157,dy+117+i*15);p.lineTo(dx+191,dy+127+i*15);}p.stroke();}
-  p.restore();drawGlasses(glasses,dx+247,dy+76,t,p,58);drawHat(hat,dx+215,dy+58,t,p,82);
-  p.save();p.globalAlpha=.9;p.fillStyle='#f7f0dc';p.font='1000 22px ui-monospace,monospace';p.fillText('LIVE LOADOUT',390,88);p.globalAlpha=.58;p.font='700 15px ui-monospace,monospace';p.fillText('POSE-LOCKED',390,116);p.fillText('ANIMATED',390,139);p.restore();
+  if(!ui.closetPreview||ui.closet.style.display!=='block')return;
+  drawWardrobeMascot(ui.closetPreview,t,{skin:cosmeticItem(wardrobePreview.skin)||COSMETICS.skins[0],glasses:cosmeticItem(wardrobePreview.glasses)?.style||'none',hat:cosmeticItem(wardrobePreview.hat)?.style||'none'});
 }
 function drawCatProcedural(x,y,t,smoking=false){
   const skin=cosmeticItem(save.cosmetics.equipped.skin)||COSMETICS.skins[0]; const glasses=cosmeticItem(save.cosmetics.equipped.glasses)?.style||'none'; const hat=cosmeticItem(save.cosmetics.equipped.hat)?.style||'none';
@@ -998,22 +979,9 @@ function drawSpriteSkinMarks(skin,eye,t){
   ctx.restore();
 }
 function drawCat(x,y,t,smoking=false){
-  if(!art.cat.complete||!art.cat.naturalWidth){drawCatProcedural(x,y,t,smoking);return;}
-  const skin=cosmeticItem(save.cosmetics.equipped.skin)||COSMETICS.skins[0]; const glasses=cosmeticItem(save.cosmetics.equipped.glasses)?.style||'none'; const hat=cosmeticItem(save.cosmetics.equipped.hat)?.style||'none';
-  const blink=game.inv>0&&Math.floor(game.inv*16)%2===0, airborne=!cat.onGround;
-  const canCycle=game.state==='run'&&art.catRunCycle.complete&&art.catRunCycle.naturalWidth;
-  const canPuff=smoking&&art.catPuffCycle.complete&&art.catPuffCycle.naturalWidth;
-  const frame=canCycle?runFrameState():-1, puffFrame=canPuff?encounterFrameState():-1, usingCycle=frame>=0;
-  ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.fillStyle='#05060a';ctx.globalAlpha*=.34;ctx.beginPath();ctx.ellipse(x+1,groundY+5,38,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
-  const recoil=cat.landTime>0?cat.landTime/.14:0, launch=cat.launchTime>0?cat.launchTime/.12:0;
-  const squash=Math.max(recoil,launch), footY=y+26;
-  const puffPose=canPuff?PUFF_TRANSFORMS[puffFrame]:PUFF_TRANSFORMS[0];
-  const eyeLocal=usingCycle?RUN_EYE_ANCHORS[frame]:canPuff?PUFF_EYE_ANCHORS[puffFrame]:[27,-57];
-  ctx.save();ctx.globalAlpha=(blink?.28:1)*(game.ghostTime>0?.72:1);ctx.translate(x,footY);ctx.rotate(canPuff?puffPose.r:airborne&&!usingCycle?Math.max(-.11,Math.min(.08,cat.vy/4300)):0);ctx.scale((1+squash*.055)*puffPose.sx,(1-squash*.075)*puffPose.sy);ctx.filter=game.ghostTime>0?'drop-shadow(0 0 7px #80e1c1)':'none';ctx.imageSmoothingEnabled=true;
-  if(usingCycle) drawRunCycleFrame(frame,skin);
-  else if(canPuff) drawPuffCycleFrame(puffFrame,skin);
-  else { const sprite=airborne&&art.catJump.complete?art.catJump:art.cat; drawSkinnedSprite(ctx,sprite,skin,0,0,sprite.naturalWidth,sprite.naturalHeight,-56,-75,112,75,airborne?'jump':'base'); }
-  ctx.filter='none';drawSpriteSkinMarks(skin,eyeLocal,t);drawGlasses(glasses,eyeLocal[0],eyeLocal[1],t);drawHat(hat,eyeLocal[0]-6,eyeLocal[1]-23,t);ctx.restore();
+  const skin=cosmeticItem(save.cosmetics.equipped.skin)||COSMETICS.skins[0],glasses=cosmeticItem(save.cosmetics.equipped.glasses)?.style||'none',hat=cosmeticItem(save.cosmetics.equipped.hat)?.style||'none';
+  const blink=game.inv>0&&Math.floor(game.inv*16)%2===0,puff=smoking&&cat.puffTime>0?Math.sin(Math.min(1,(.34-cat.puffTime)/.34)*Math.PI):0;
+  drawCodeCat(ctx,x,y,t,{skin,glasses,hat,run:cat.frame,airborne:!cat.onGround,airTilt:Math.max(-.12,Math.min(.09,cat.vy/4200)),puff,smoking,ghost:game.ghostTime>0,alpha:(blink?.28:1)*(game.ghostTime>0?.76:1),sprint:game.sprintActive});
   if(smoking){const ratio=game.cigMax?game.cigHp/game.cigMax:1,mouth=catMouthSocket();drawSmokeHeld(game.smokeable,mouth.x,mouth.y,ratio);}
 }
 const GROUND_HAZARD_SPRITES={
@@ -1223,7 +1191,7 @@ ui.puff.addEventListener('touchstart',startPuffHold,{passive:false}); ui.puff.ad
 addEventListener('keydown',e=>{ if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();game.state==='smoke'?puff(true):jump();} if((e.code==='ShiftLeft'||e.code==='ShiftRight')&&!e.repeat){e.preventDefault();setSprint(true);} if(e.key.toLowerCase()==='u')openShop(); });
 addEventListener('keyup',e=>{ if(e.code==='ShiftLeft'||e.code==='ShiftRight'){e.preventDefault();setSprint(false);} });
 document.addEventListener('visibilitychange',()=>{ if(audio&&document.hidden){ audio.master.gain.setTargetAtTime(0,audio.ctx.currentTime,.02); } else if(audio){ audio.ctx.resume(); nextNoteTime=audio.ctx.currentTime+.05; if(!save.muted) audio.master.gain.setTargetAtTime(.62,audio.ctx.currentTime,.03); } });
-let last=performance.now(); function loop(now){ const dt=Math.min(.033,(now-last)/1000); last=now; update(dt); render(now); renderWardrobePreview(now/1000); requestAnimationFrame(loop); } requestAnimationFrame(loop); syncContentModeUI(); checkCosmeticUnlocks(); updateHud(); refreshShop(); renderWardrobe();
+let last=performance.now(); function loop(now){ const dt=Math.min(.033,(now-last)/1000),t=now/1000; last=now; update(dt); render(now); renderWardrobePreview(t); if(ui.start.style.display!=='none')drawTitleMascot($('titleCat'),t,cosmeticItem(save.cosmetics.equipped.skin)||COSMETICS.skins[0]); requestAnimationFrame(loop); } requestAnimationFrame(loop); syncContentModeUI(); checkCosmeticUnlocks(); updateHud(); refreshShop(); renderWardrobe();
 })();
 </script>
 </body>
