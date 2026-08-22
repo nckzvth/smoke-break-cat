@@ -27,6 +27,8 @@ The cat is ugly-cute by design. Awkwardness is allowed when it makes the express
 - Equippables anchor inside the cat's local head transform and remain readable at phone scale.
 - Animate shape transforms, limbs, tails, brows, glow, and accessory parts directly in canvas.
 - Use authored idle, run, airborne, and puff poses. A pose must change limb placement and weight, not merely rotate the whole mascot.
+- Construct the body from readable pelvis, ribcage, tucked waist, shoulder, neck, and skull masses. Never return to a capsule torso with a head pasted onto it.
+- The run uses six interpolated keys: contact, compression, passing, lift, extended flight, and tucked flight. Far limbs recede; near limbs carry the action.
 - Every wardrobe card must show a code-drawn thumbnail so the visual reward is legible before it is unlocked or equipped.
 - Original and Little Baby Idiot props share timing, sockets, scale, and gameplay rules.
 - Do not ship generated character, cosmetic, hazard, loot, or encounter-device raster atlases.

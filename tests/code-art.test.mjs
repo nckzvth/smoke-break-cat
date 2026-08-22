@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  CAT_RUN_KEY_COUNT,
   drawCodeCat,
   drawCosmeticThumbnail,
   drawCodeGlasses,
@@ -28,6 +29,7 @@ const hats = ['none','beanie','trucker','cowboy','wizard','crown','bucket','devi
 const patterns = ['plain','tux','calico','siamese','black','snow','tabby','tortie','ghost','neon','tiger','skeleton'];
 
 test('exports one reusable code-native mascot system', () => {
+  assert.equal(CAT_RUN_KEY_COUNT, 6);
   assert.equal(typeof drawCodeCat, 'function');
   assert.equal(typeof drawCosmeticThumbnail, 'function');
   assert.equal(typeof drawTitleMascot, 'function');
