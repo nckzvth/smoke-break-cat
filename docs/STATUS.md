@@ -21,6 +21,8 @@ Last updated: 2026-08-21 (America/New_York)
 - Added persistent Original and Little Baby Idiot presentation modes without duplicating game rules.
 - Added complete candy presentations and code-native props for all 11 street and boss encounters.
 - Added unit coverage that enforces complete mappings and verifies presentation swaps preserve mechanics.
+- Established a generated neo-retro character/VFX concept anchor with documented palette, layering rules, prompt, source, and usage status.
+- Reworked the runtime cat silhouette, face, paws, encounter arm, and burst particles as the first code-native translation of that direction.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
 
 ## Validated
@@ -33,6 +35,7 @@ Last updated: 2026-08-21 (America/New_York)
 - Original-to-candy switching during a paused active encounter
 - Candy encounter clear and SPRINKLES reward flow
 - Candy preference persistence across reload
+- 844×390 Original and Candy encounter rendering with the revised character and prop layers
 - 390×844 live GitHub Pages start/run smoke test
 - GitHub Pages build and deployment workflow
 

@@ -45,6 +45,7 @@ Pull requests run the same validation in GitHub Actions. Merges to `main` deploy
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Product and distribution decisions](docs/PRODUCT_DECISIONS.md)
 - [Content-mode contract](docs/CONTENT_MODES.md)
+- [Visual direction and asset provenance](docs/ART_DIRECTION.md)
 - [Current production status](docs/STATUS.md)
 
 ## License
