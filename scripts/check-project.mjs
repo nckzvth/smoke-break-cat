@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import vm from 'node:vm';
+import { execFileSync } from 'node:child_process';
 
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 const failures = [];
@@ -26,9 +26,14 @@ if (!scriptBlocks.length) failures.push('index.html must contain game JavaScript
 
 for (const [index, block] of scriptBlocks.entries()) {
   try {
-    new vm.Script(block[1], { filename: `index.html:inline-script-${index + 1}.js` });
+    const attributes = block[0].slice(0, block[0].indexOf('>'));
+    const moduleArgs = /type=["']module["']/i.test(attributes) ? ['--input-type=module'] : [];
+    execFileSync(process.execPath, [...moduleArgs, '--check', '-'], {
+      input: block[1],
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
   } catch (error) {
-    failures.push(error.message);
+    failures.push(`inline script ${index + 1}: ${error.stderr?.toString().trim() || error.message}`);
   }
 }
 

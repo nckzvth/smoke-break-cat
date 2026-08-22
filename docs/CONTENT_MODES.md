@@ -14,7 +14,7 @@ The intended default for the web alpha. It preserves the cigarettes, filters, va
 
 An optional candy-themed content skin with deliberately unserious framing. The setting is saved as a user preference and can be changed without restarting progression.
 
-Working encounter mapping:
+Implemented encounter mapping:
 
 | Original | Candy presentation |
 | --- | --- |
@@ -30,7 +30,7 @@ Working encounter mapping:
 | Phantom Bong | Phantom Gumball Machine |
 | Chainsmoker 3000 | Candy Crusher 3000 |
 
-Names are working copy and may change during the tone pass.
+The registry lives in `src/content/content-modes.js`. Its tests require every canonical encounter ID to have a candy presentation and verify that the swap cannot change mechanics or rewards.
 
 ## Technical requirements
 
@@ -44,7 +44,15 @@ Names are working copy and may change during the tone pass.
 
 ## UX requirements
 
-- Put the toggle in Settings and make its effect explicit before applying it.
+- Put the toggle on the title screen and in the Cat Closet so it remains reachable before and during a run.
 - Preserve the exact label **Little Baby Idiot Mode** unless the owner changes it.
-- Use a short explanation: “Turns the smoke gear into candy. Same game, same balance, less cool.”
+- Use a short explanation: “Candy-coats every encounter prop and label. Same game, same balance, less cool.”
 - Do not present the toggle as medical advice, an age gate, or a guarantee of store-policy compliance.
+
+## Implementation status
+
+- The saved `original`/`candy` preference migrates old saves to Original Mode without touching progression.
+- All 11 street and boss encounters have mode-specific names, titles, metadata, and code-native props.
+- HUD currency, actions, rewards, shop copy, wardrobe copy, particles, and end-of-run summaries update immediately.
+- A mode switch during an encounter pauses safely in the closet and redraws the same canonical encounter with the alternate presentation.
+- Balance, health, rewards, effects, ownership IDs, and boss progression remain canonical shared data.
