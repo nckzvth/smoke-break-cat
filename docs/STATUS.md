@@ -29,6 +29,7 @@ Last updated: 2026-08-22 (America/New_York)
 - Rebuilt all twelve skins as pattern/color treatments of the same mascot and all twenty-two equippables as bold code-drawn head-local layers.
 - Refined the shared mascot around a smaller phone-scale footprint, longer feline body, connected chest, articulated paws, and distinct planted/run/airborne/puff limb poses; the title now presents the unobscured base face instead of burying it under forced accessories.
 - Added code-drawn thumbnails to all thirty-six wardrobe cards so skins and equippables advertise their actual in-game appearance before purchase or equip.
+- Corrected the mascot from a front-facing, heavy torso into a slimmer street-cat profile with a flatter back, tucked belly, dominant near eye, receding far eye, and forward-shifted muzzle.
 - Added an animated closet loadout preview with safe preview-only handling for locked items and immediate persistent equip behavior for owned items.
 - Added overt non-character motion to neon signs, windows, moon glow, overhead wires, street steam, every ground-hazard class, aerial threat details, loot, and Original/Candy encounter devices.
 - Added encounter focus lighting, pulsing floor auras, boss orbit chevrons, device glows/screens/bubbles, and puff-synchronized impact rings without changing encounter health, input cadence, or rewards.
