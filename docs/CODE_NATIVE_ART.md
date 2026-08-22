@@ -1,34 +1,33 @@
-# Code-Native Art Direction — Gremlin Cut
+# Code-Native Art Direction — Gremlin Zine
 
 ## Decision
 
-The generated-raster direction is rejected. The shipping game returns to the prototype's authored canvas language and improves it in place. Character, skins, hats, glasses, hazards, loot, smokeables, candy equivalents, animation, and VFX must be drawn from deterministic code-native shapes unless the owner explicitly approves a different source.
+Both the generated-raster direction and the rounded neon Gremlin Cut are rejected. The shipping game uses a raw punk-editorial vector language: imperfect screen-print shapes, paper/ink contrast, offset shadows, pasted street bills, and authored whole-pose animation. Character, skins, hats, glasses, hazards, loot, smokeables, candy equivalents, animation, and VFX remain deterministic and code-native unless the owner explicitly approves a different source.
 
 ## Identity
 
-Smoke Break Cat is a thick-ink midnight sticker cartoon about one permanently unimpressed street gremlin. The mascot must be recognizable from its silhouette alone:
+Smoke Break Cat is a bootleg midnight zine about one permanently unimpressed urban cat gremlin. The mascot must be recognizable from its silhouette alone:
 
-- long horizontal body and question-mark tail;
-- chunky ribcage, grounded haunches, connected chest, and readable front/back paws;
-- oversized angular head and ears;
+- oversized rounded sticker head and tiny upright biped body, with no literal neck mass;
+- two short legs, two articulated arms, compact sneakers, cropped bomber/hoodie, and a low question-mark tail;
 - a three-quarter face aimed into the run direction; the mascot must never stare squarely at the camera;
-- hostile yellow eyes with heavy brows;
+- oversized dark asymmetric eyes with a smaller far eye, dominant near eye, and irregular painted brows;
 - cream muzzle, pink nose, one stupid snaggletooth;
-- black bandana and tiny metal stud;
-- visible paws and a device attached to the mouth during encounters.
+- visible hands and feet, with the encounter device attached directly to the mouth.
 
 The cat is ugly-cute by design. Awkwardness is allowed when it makes the expression funnier; generic polish is not.
 
 ## Rendering rules
 
-- Use thick near-black outlines, simple filled shapes, and a four-accent palette.
+- Use imperfect near-black ink, warm paper, simple filled shapes, offset shadows, and a restrained screen-print palette.
 - Preserve one shared mascot renderer across title, gameplay, encounters, and wardrobe preview.
 - Skins change the same body through color, patches, stripes, bones, or glow; they never replace the cat's face or silhouette.
 - Equippables anchor inside the cat's local head transform and remain readable at phone scale.
 - Animate shape transforms, limbs, tails, brows, glow, and accessory parts directly in canvas.
 - Use authored idle, run, airborne, and puff poses. A pose must change limb placement and weight, not merely rotate the whole mascot.
-- Construct the body from readable pelvis, ribcage, tucked waist, shoulder, neck, and skull masses. Never return to a capsule torso with a head pasted onto it.
-- The run uses six interpolated keys: contact, compression, passing, lift, extended flight, and tucked flight. Far limbs recede; near limbs carry the action.
+- Keep the body upright and chibi. Literal neck, throat, quadruped spine, feline ribcage, haunch, and panther anatomy are rejected.
+- During a smoke pose, the lifted near arm replaces its normal run/idle arm. The cat must always have exactly two arms and two legs.
+- The run uses six authored biped keys: opposing contact, compression, passing, and flight. Smooth interpolation connects strong silhouettes; it must not disguise weak poses. Far limbs recede but remain readable.
 - Every wardrobe card must show a code-drawn thumbnail so the visual reward is legible before it is unlocked or equipped.
 - Original and Little Baby Idiot props share timing, sockets, scale, and gameplay rules.
 - Do not ship generated character, cosmetic, hazard, loot, or encounter-device raster atlases.
@@ -47,4 +46,6 @@ The canonical stress loadout is Hell Tiger + Laser Visor + Traffic Cone King. If
 
 ## Rejected direction
 
-The prior generated neo-retro raster atlases were removed from the public build and repository on 2026-08-22. Their inconsistent rendering, pose identity, skin treatment, and accessory integration did not meet the product's identity standard. They are recoverable from Git history but are not approved shipping assets.
+The prior generated neo-retro raster atlases were removed from the public build and repository on 2026-08-22. The later rounded neon Gremlin Cut, boxed face geometry, capsule torso, and interpolated rig were also rejected. They are recoverable from Git history but are not approved shipping directions.
+
+The subsequent realistic single-profile and quadruped experiments were rejected because the neck read as an awkward growth and the body plan missed the supplied Cat Quest target. The approved construction borrows only the abstraction level and bipedal chibi proportion language of compact action-RPG mascots, replaces fantasy gear with an original bomber-and-sneakers street identity, and does not copy a reference character.

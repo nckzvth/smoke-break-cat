@@ -154,6 +154,47 @@
     #playtestToggle { top:6px; right:6px; padding:6px 8px; }
     #playtestPanel { top:44px; max-height:calc(100vh - 52px); }
   }
+
+  /* GREMLIN ZINE: raw screen-print UI, replacing the rounded neon app-shell language. */
+  :root { --ui:#efe6c8; --ink:#09090b; --hot:#ef4b3f; --mint:#65cfad; --gold:#f3c84b; --vio:#8d69cf; --red:#ef4b3f; }
+  html,body { background:#161419; font-family:"Arial Narrow","Roboto Condensed",Impact,system-ui,sans-serif; }
+  canvas { image-rendering:auto; }
+  .hud { text-shadow:none; }
+  .pill { color:var(--ink); background:var(--ui); border:2px solid var(--ink); border-radius:1px; padding:6px 9px; box-shadow:3px 3px 0 var(--hot); font-family:ui-monospace,monospace; font-weight:900; transform:skew(-2deg); }
+  button { border:3px solid var(--ink); border-radius:2px; box-shadow:5px 5px 0 var(--ink); letter-spacing:.07em; text-transform:uppercase; }
+  button:active { transform:translate(3px,3px) rotate(-1deg); box-shadow:2px 2px 0 var(--ink); }
+  #jumpBtn,#sprintBtn,#puffBtn { border-radius:2px; }
+  #jumpBtn { background:var(--mint); transform:rotate(-.6deg); }
+  #sprintBtn { color:var(--ink); background:var(--hot); transform:rotate(.5deg); }
+  #sprintBtn.active { background:var(--gold); box-shadow:2px 2px 0 var(--ink),0 0 0 4px var(--hot); }
+  #puffBtn { background:var(--gold); }
+  .meter,#cigFill { border-radius:0; }
+  .meter { border:3px solid var(--ink); background:var(--ui); box-shadow:4px 4px 0 var(--hot); }
+  #startScreen { background-color:#18161a; background-image:radial-gradient(#efe6c820 1.2px,transparent 1.2px),linear-gradient(122deg,#ef4b3f18 0 16%,transparent 16% 76%,#65cfad12 76%); background-size:14px 14px,100% 100%; }
+  .startCard { color:var(--ink); background:var(--ui); border:4px solid var(--ink); border-radius:2px; box-shadow:11px 11px 0 var(--hot); transform:rotate(-.25deg); }
+  .logo { color:var(--ink); font-family:Impact,"Arial Black",system-ui,sans-serif; letter-spacing:-.055em; transform:skew(-7deg) rotate(-1deg); text-shadow:3px 3px 0 #c9bfa2; }
+  .logo span { color:var(--hot); }
+  .logo b { display:inline-block; margin-left:.45em; color:var(--ink); font:inherit; letter-spacing:0; }
+  .tag,.tiny { opacity:.82; }
+  #startBtn { background:var(--mint); }
+  #startStyleBtn { color:var(--ui)!important; background:var(--ink)!important; }
+  #startModeBtn { background:var(--gold)!important; }
+  #gameOver { background:#18161ae8; }
+  .panel,.closetPanel { color:var(--ink); background:var(--ui); border:4px solid var(--ink); border-radius:2px; box-shadow:10px 10px 0 var(--hot); }
+  .panel h2,.closetHead h2,.closetSection h3 { font-family:Impact,"Arial Black",system-ui,sans-serif; letter-spacing:.03em; }
+  .currency,.branch,.closetLegend,.saveTools { border:2px solid var(--ink); border-radius:1px; }
+  .currency,.closetLegend,.saveTools { color:var(--ui); background:#1b191d; }
+  .branch { color:var(--ui); background:#1b191d; }
+  .upgrade { border:2px solid #efe6c840; border-radius:0; background:#29252b; }
+  .closetPreview { border:3px solid var(--ink); border-radius:0; background:#191717; }
+  .cosCard { color:var(--ink); background:#ded4b8; border:2px solid var(--ink); border-radius:0; box-shadow:3px 3px 0 #09090b33; }
+  .cosThumb { border-radius:0; background:#191717; }
+  .cosCard.unlocked { border-color:var(--ink); }
+  .cosCard.equipped { border-color:var(--hot); box-shadow:4px 4px 0 var(--hot); }
+  .cosCard.pack { border-color:#6b4ea1; }
+  .close,#closeCloset { background:var(--hot); }
+  #modalShade,#closetShade { background:#18161aee; backdrop-filter:none; }
+  #playtestToggle,#playtestPanel { border-radius:0; border:3px solid var(--ink); box-shadow:5px 5px 0 var(--hot); }
 </style>
 </head>
 <body>
@@ -204,6 +245,8 @@
       <button id="playtestMode">TOGGLE CANDY</button>
       <button id="playtestPacks">GRANT 10 PACKS</button>
       <button id="playtestHeal">FULL HEAL</button>
+      <button id="playtestFlyer">SPAWN FLYER</button>
+      <button id="playtestBox">SPAWN TEST BOX</button>
       <button class="wide" id="playtestCosmetics">UNLOCK ALL COSMETICS</button>
     </div>
     <button id="playtestClose">HIDE LAB</button>
@@ -212,7 +255,7 @@
   <div id="startScreen">
     <div class="startCard">
       <canvas id="titleCat" width="420" height="244" aria-label="Animated code-drawn street cat mascot"></canvas>
-      <div class="logo" id="gameLogo">SMOKE<br><span>BREAK</span> CAT</div>
+      <div class="logo" id="gameLogo">SMOKE<br><span>BREAK</span> <b>CAT</b></div>
       <div class="tag" id="startTag">THE GREMLIN CUT. One furious street cat. 36 stupid hats. Infinite bad decisions. Run, dodge, headbutt contraband, and humiliate gigantic smoking appliances.</div>
       <button id="startBtn">TAP TO START + SOUND</button>
       <button id="startStyleBtn" style="width:100%;margin-top:9px;background:#b388ff;">CAT CLOSET</button>
@@ -300,7 +343,7 @@ const ui = {
   closet:$('closetShade'), closetStats:$('closetStats'), closetPreview:$('closetPreview'), previewLoadout:$('previewLoadout'), skinGrid:$('skinGrid'), glassesGrid:$('glassesGrid'), hatGrid:$('hatGrid'), closeCloset:$('closeCloset'), startStyle:$('startStyleBtn'), startMode:$('startModeBtn'), closetMode:$('closetModeBtn'), exportSave:$('exportSaveBtn'), importSave:$('importSaveBtn'), importSaveFile:$('importSaveFile'),
   logo:$('gameLogo'), startTag:$('startTag'), startTiny:$('startTiny'), closetSub:$('closetSub'), shopTitle:$('shopTitle'), shopSub:$('shopSub'), passiveTitle:$('passiveTitle'), activeTitle:$('activeTitle'),
   start:$('startScreen'), startBtn:$('startBtn'), gameOver:$('gameOver'), retry:$('retryBtn'), finalDist:$('finalDist'), finalText:$('finalText'),
-  playtestToggle:$('playtestToggle'), playtestPanel:$('playtestPanel'), playtestStatus:$('playtestStatus'), playtestStreet:$('playtestStreet'), playtestMode:$('playtestMode'), playtestPacks:$('playtestPacks'), playtestHeal:$('playtestHeal'), playtestCosmetics:$('playtestCosmetics'), playtestClose:$('playtestClose')
+  playtestToggle:$('playtestToggle'), playtestPanel:$('playtestPanel'), playtestStatus:$('playtestStatus'), playtestStreet:$('playtestStreet'), playtestMode:$('playtestMode'), playtestPacks:$('playtestPacks'), playtestHeal:$('playtestHeal'), playtestFlyer:$('playtestFlyer'), playtestBox:$('playtestBox'), playtestCosmetics:$('playtestCosmetics'), playtestClose:$('playtestClose')
 };
 
 const playtestEnabled=new URLSearchParams(location.search).get('playtest')==='1';
@@ -379,10 +422,10 @@ function resize(){
 addEventListener('resize',resize,{passive:true}); resize();
 
 const DISTRICTS=[
-  {name:'ALLEY 1',bg:['#12172d','#282246','#4a2e4f'],speedBonus:0,hazard:1},
-  {name:'NEON BLOCK',bg:['#10192f','#223155','#513c57'],speedBonus:40,hazard:1.18},
-  {name:'SKYBRIDGE',bg:['#0d1327','#2a2453','#59293f'],speedBonus:78,hazard:1.34},
-  {name:'HELL FREEWAY',bg:['#150f18','#3d1730','#712626'],speedBonus:120,hazard:1.52}
+  {name:'ALLEY 1',bg:['#101014','#252229','#3b302f'],speedBonus:0,hazard:1},
+  {name:'NEON BLOCK',bg:['#11161a','#213638','#47402f'],speedBonus:40,hazard:1.18},
+  {name:'SKYBRIDGE',bg:['#131219','#31283b','#573438'],speedBonus:78,hazard:1.34},
+  {name:'HELL FREEWAY',bg:['#170f11','#441d20','#782b25'],speedBonus:120,hazard:1.52}
 ];
 const SMOKES=[
   {id:'sidewalkSpecial',name:'SIDEWALK SPECIAL',title:'CIGARETTE ENCOUNTER',visual:'cigarette',hp:1,reward:1,effect:null,meta:'plain, cheap, mean'},
@@ -428,7 +471,7 @@ function syncContentModeUI(){
   document.title=candy?'SNACK BREAK CAT: LITTLE BABY IDIOT MODE':'SMOKE BREAK CAT: GREMLIN CUT';
   const toggleLabel=`LITTLE BABY IDIOT MODE: ${candy?'ON':'OFF'}`;
   ui.startMode.textContent=toggleLabel; ui.closetMode.textContent=toggleLabel;
-  ui.logo.innerHTML=candy?'SNACK<br><span>BREAK</span> CAT':'SMOKE<br><span>BREAK</span> CAT';
+  ui.logo.innerHTML=candy?'SNACK<br><span>BREAK</span> <b>CAT</b>':'SMOKE<br><span>BREAK</span> <b>CAT</b>';
   ui.startTag.textContent=candy?'THE SUGAR GREMLIN CUT. One furious street cat. 36 stupid hats. Infinite bad decisions. Run, dodge, headbutt candy, and humiliate gigantic dessert appliances.':'THE GREMLIN CUT. One furious street cat. 36 stupid hats. Infinite bad decisions. Run, dodge, headbutt contraband, and humiliate gigantic smoking appliances.';
   ui.startTiny.textContent=candy?'Tap anywhere to jump. Hold SPRINT (or Shift) to surge forward. Cosmetics, SPRINKLES, PACKS, achievements and equipped style persist on this device.':'Tap anywhere to jump. Hold SPRINT (or Shift) to surge forward and change flyer timing. Cosmetics, Ash, PACKS, achievements and equipped style persist on this device.';
   ui.closetSub.textContent=candy?'36 cosmetics. Earn them by running stupidly far, eating everything, bullying candy bosses, cracking loot, threading flyers, finding rare drops, or spending PACKS.':'36 cosmetics. Earn them by running stupidly far, smoking everything, bullying bosses, cracking loot, threading flyers, finding rare drops, or spending PACKS.';
@@ -619,9 +662,9 @@ function spawnObstacle(){
   obstacles.push({x:W+70,y:groundY-h,w:type==='puddle'?62:34,h,type,passed:false,flap:Math.random()*6.28});
 }
 function spawnFlying(){
-  // One readable air threat at a time. Its low point only grazes the standing head lane; sprint changes WHEN that low point reaches you.
+  // High-risk lane: staying grounded is safe; jumping close earns an AIR DODGE but risks contact.
   const types=['crow','drone','bat']; const type=types[(Math.random()*types.length)|0];
-  const profiles={crow:{alt:[108,120],amp:[38,44],freq:[1.85,2.25],w:38,h:24},drone:{alt:[102,114],amp:[30,38],freq:[1.45,1.8],w:42,h:24},bat:{alt:[112,124],amp:[40,48],freq:[2.2,2.7],w:38,h:22}};
+  const profiles={crow:{alt:[142,150],amp:[20,26],freq:[1.85,2.25],w:50,h:30},drone:{alt:[136,144],amp:[16,22],freq:[1.45,1.8],w:54,h:30},bat:{alt:[146,154],amp:[22,28],freq:[2.2,2.7],w:50,h:28}};
   const pr=profiles[type], rnd=(a,b)=>a+Math.random()*(b-a), altitude=rnd(...pr.alt);
   flyers.push({x:W+120,baseY:groundY-altitude,w:pr.w,h:pr.h,type,phase:-Math.PI*.55+Math.random()*.7,amp:rnd(...pr.amp),freq:rnd(...pr.freq),wave2:Math.random()*Math.PI*2,flap:Math.random()*6.28,passed:false,sounded:false});
 }
@@ -636,8 +679,8 @@ function spawnBox(){
 }
 function burst(x,y,type,n){ for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*190,vy:-Math.random()*180-20,life:.35+Math.random()*.4,t:0,type,s:2+Math.random()*5}); }
 function catMouthSocket(){
-  const recoil=game.state==='smoke'&&cat.puffTime>0?Math.sin(Math.min(1,(.34-cat.puffTime)/.34)*Math.PI)*3:0;
-  return {x:cat.x+57+recoil*.74,y:cat.y-23-recoil*.34};
+  const recoil=game.state==='smoke'&&cat.puffTime>0?Math.sin(Math.min(1,(.34-cat.puffTime)/.34)*Math.PI)*1.6:0;
+  return {x:cat.x+(25+recoil)*.82,y:cat.y-43*.82-recoil*.42};
 }
 function smokeBurst(n){ const mouth=catMouthSocket(); for(let i=0;i<n;i++) smokePuffs.push({x:mouth.x+8+Math.random()*6,y:mouth.y-2+Math.random()*4,vx:28+Math.random()*28,vy:-25-Math.random()*34,life:.8+Math.random()*.7,t:0,s:3+Math.random()*7,rot:Math.random()*Math.PI*2,spin:(Math.random()-.5)*3,curl:.7+Math.random()*.8,hue:Math.random()*360}); }
 
@@ -666,7 +709,8 @@ function update(dt){
       cat.y=groundY-26; cat.vy=0; cat.onGround=true;
     }
     cat.frame+=dt*Math.min(13,7.5+game.speed/90);
-    const cx=cat.x-13,cy=cat.y-21,cw=28,ch=43;
+    // Upright chibi hitbox: narrow torso/legs, full head height, safe high flyer lane while grounded.
+    const cx=cat.x-17,cy=cat.y-70,cw=36,ch=82;
     for(const o of obstacles){ o.x-=scroll; o.flap+=dt*10; if(cx<o.x+o.w && cx+cw>o.x && cy<o.y+o.h && cy+ch>o.y){ hit(); o.x=-999; } }
     for(const f of flyers){
       f.x-=(scroll*.88); f.phase+=dt*f.freq; f.flap+=dt*(8+f.freq);
@@ -681,7 +725,7 @@ function update(dt){
       }
     }
     for(const b of boxes){
-      b.x-=scroll; b.bob+=dt*4; const headTop=cat.y-60, headBottom=cat.y-28;
+      b.x-=scroll; b.bob+=dt*4; const headTop=cat.y-76, headBottom=cat.y-40;
       if(!b.hit && cat.vy<0 && cat.x+15>b.x && cat.x-12<b.x+b.w && headTop<b.y+b.h && headBottom>b.y){ b.hit=true; save.stats.boxesOpened++; saveNow(); checkCosmeticUnlocks(); cat.vy=Math.max(cat.vy,-190); burst(b.x+b.w/2,b.y+8,'box',18); sfx('box'); applyBoxReward(b.reward); }
     }
     obstacles=obstacles.filter(o=>o.x>-120); flyers=flyers.filter(f=>f.x>-120); boxes=boxes.filter(b=>b.x>-120 && !b.hit);
@@ -709,6 +753,9 @@ function drawBackground(t){
   ctx.strokeStyle='#08090ecc';ctx.lineWidth=4;for(let line=0;line<2;line++){ctx.beginPath();ctx.moveTo(-20,62+line*24);ctx.quadraticCurveTo(W*.48,95+line*18+Math.sin(t*1.8+line)*4,W+30,52+line*27);ctx.stroke();}
   ctx.fillStyle='#9793a2';ctx.fillRect(0,groundY,W,17);ctx.fillStyle=ink;ctx.fillRect(0,groundY+14,W,5);ctx.fillStyle='#4a4855';ctx.fillRect(0,groundY+19,W,H-groundY-19);const road=ctx.createLinearGradient(0,groundY+20,0,H);road.addColorStop(0,'#393945');road.addColorStop(1,'#242630');ctx.fillStyle=road;ctx.fillRect(0,groundY+23,W,H-groundY-23);const seamOff=(game.worldX*.35)%94;ctx.strokeStyle='#191b23';ctx.lineWidth=2;for(let sx=-seamOff;sx<W+94;sx+=94){ctx.beginPath();ctx.moveTo(sx,groundY+2);ctx.lineTo(sx-5,groundY+15);ctx.stroke();}const stripeOff=(game.worldX*.6)%160;ctx.fillStyle='#e0c66f';for(let sx=-stripeOff;sx<W+160;sx+=160){ctx.beginPath();ctx.moveTo(sx,groundY+76);ctx.lineTo(sx+78,groundY+76);ctx.lineTo(sx+72,groundY+82);ctx.lineTo(sx-6,groundY+82);ctx.closePath();ctx.fill();}for(let i=0;i<Math.ceil(W/130)+2;i++){const cx=i*137-(game.worldX*.42)%137;ctx.strokeStyle='#171922';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,groundY+35);ctx.lineTo(cx+11,groundY+29);ctx.lineTo(cx+18,groundY+37);ctx.lineTo(cx+31,groundY+32);ctx.stroke();}
   if(game.sprintActive&&game.state==='run'){ctx.globalAlpha=.55;for(let i=0;i<8;i++){const sy=72+i*27%Math.max(90,groundY-60),len=44+(i%3)*27;ctx.fillStyle=['#ffd166','#ff5f57','#80e1c1','#b388ff'][i%4];ctx.beginPath();ctx.moveTo(W-(i*113+t*360)%W,sy);ctx.lineTo(W-(i*113+t*360)%W-len,sy+2);ctx.lineTo(W-(i*113+t*360)%W-len*.8,sy+5);ctx.closePath();ctx.fill();}ctx.globalAlpha=1;}
+  // Screen-print grain and pasted street bills unify the world with the raw zine UI.
+  ctx.save();ctx.globalAlpha=.055;ctx.fillStyle='#efe6c8';for(let gy=12;gy<groundY;gy+=17)for(let gx=(gy%34);gx<W;gx+=34){ctx.beginPath();ctx.arc(gx,gy,1.15,0,Math.PI*2);ctx.fill();}ctx.restore();
+  const posterOff=(game.worldX*.18)%(W+260);for(let i=0;i<3;i++){const px=((i*247-posterOff)%(W+260)+W+260)%(W+260)-70,py=groundY-118-(i%2)*42;ctx.save();ctx.translate(px,py);ctx.rotate((i%2?1:-1)*.035);ctx.fillStyle=i%2?'#efe6c8':'#ef4b3f';ctx.strokeStyle=ink;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-28,-22);ctx.lineTo(31,-20);ctx.lineTo(27,22);ctx.lineTo(-31,19);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle=i%2?ink:'#efe6c8';ctx.font='900 10px Arial Black,sans-serif';ctx.textAlign='center';ctx.fillText(i===0?'NO BOSS':i===1?'BREAK':'BAD CAT',0,2);ctx.textAlign='left';ctx.restore();}
   const vignette=ctx.createRadialGradient(W*.5,H*.45,Math.min(W,H)*.2,W*.5,H*.45,Math.max(W,H)*.72);vignette.addColorStop(.55,'#0000');vignette.addColorStop(1,'#02030aaa');ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
 }
 const SMOKEABLE_ATLAS_SPRITES={
@@ -1019,14 +1066,25 @@ function drawObstacle(o){ ctx.save();
   else { ctx.translate(o.x,o.y); ctx.fillStyle='#27262d'; ctx.beginPath(); ctx.ellipse(14,12,13,9,0,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#9899a5'; ctx.beginPath(); ctx.arc(24,8,7,0,Math.PI*2); ctx.fill(); ctx.fillStyle='#f0c55b'; ctx.beginPath(); ctx.moveTo(30,8); ctx.lineTo(39,11); ctx.lineTo(30,13); ctx.closePath(); ctx.fill(); ctx.strokeStyle='#202128'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(12,20);ctx.lineTo(9,28);ctx.moveTo(20,20);ctx.lineTo(24,28);ctx.stroke(); }
   ctx.restore(); }
 function drawFlying(f){
-  const y=flyY(f);ctx.save();ctx.translate(f.x,y);const danger=y>groundY-82;
-  // Trajectory ribbon + low-swoop warning: readable from across the screen.
-  ctx.globalAlpha=.18;ctx.strokeStyle=danger?'#ff7b72':(f.type==='drone'?'#80e1c1':'#d7cbff');ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.beginPath();for(let i=0;i<80;i+=8){const px=-i,ph=f.phase-i*.012*f.freq,py=Math.sin(ph)*f.amp+Math.sin(ph*.47+f.wave2)*f.amp*.14-(Math.sin(f.phase)*f.amp+Math.sin(f.phase*.47+f.wave2)*f.amp*.14);i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
-  if(danger){ctx.fillStyle='#ff7b72';ctx.font='1000 12px ui-monospace,monospace';ctx.fillText('!',-11,-10);}
+  const y=flyY(f);ctx.save();ctx.translate(f.x,y);const danger=y>groundY-116;
+  // Bright flight-lane ribbon makes the optional AIR DODGE risk legible before contact.
+  ctx.globalAlpha=.34;ctx.strokeStyle=danger?'#ef4b3f':(f.type==='drone'?'#65cfad':'#efe6c8');ctx.lineWidth=2.5;ctx.setLineDash([7,5]);ctx.beginPath();for(let i=0;i<96;i+=8){const px=-i,ph=f.phase-i*.012*f.freq,py=Math.sin(ph)*f.amp+Math.sin(ph*.47+f.wave2)*f.amp*.14-(Math.sin(f.phase)*f.amp+Math.sin(f.phase*.47+f.wave2)*f.amp*.14);i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+  if(!f.passed){ctx.fillStyle=danger?'#ef4b3f':'#efe6c8';ctx.strokeStyle='#09090b';ctx.lineWidth=2;ctx.font='1000 9px Arial Black,sans-serif';ctx.strokeText('AIR +2',-20,-13);ctx.fillText('AIR +2',-20,-13);}
   if(imageReady(art.hazardsFlying)){const frames=FLYING_HAZARD_SPRITES[f.type],spec=frames[Math.sin(f.flap)>=0?0:1],beat=Math.sin(f.flap);ctx.save();ctx.translate(f.w/2,f.h/2+beat);if(f.type==='drone')ctx.rotate(beat*.035);drawCroppedAtlas(art.hazardsFlying,spec,0,0,true);if(f.type==='drone'){ctx.globalAlpha=.28;ctx.strokeStyle='#80e1c1';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(-19,-11,11+beat*2,2,0,0,Math.PI*2);ctx.ellipse(19,-11,11-beat*2,2,0,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=.6+.35*Math.max(0,beat);ctx.fillStyle='#ff5f57';ctx.beginPath();ctx.arc(18,2,2.4,0,Math.PI*2);ctx.fill();}ctx.restore();ctx.restore();return;}
-  if(f.type==='drone'){ctx.fillStyle='#202633';ctx.fillRect(6,6,28,13);ctx.fillStyle='#80e1c1';ctx.fillRect(12,10,14,4);ctx.fillStyle='#ff5f57';ctx.fillRect(30,8,4,4);ctx.strokeStyle='#a4adbf';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(2,6);ctx.lineTo(10,2);ctx.moveTo(30,2);ctx.lineTo(39,6);ctx.moveTo(2,19);ctx.lineTo(10,23);ctx.moveTo(30,23);ctx.lineTo(39,19);ctx.stroke();}
-  else if(f.type==='crow'){ctx.fillStyle='#16171e';ctx.beginPath();ctx.ellipse(18,13,15,8,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#555967';ctx.beginPath();ctx.arc(31,9,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f0c55b';ctx.beginPath();ctx.moveTo(36,9);ctx.lineTo(45,12);ctx.lineTo(36,14);ctx.closePath();ctx.fill();const wing=Math.sin(f.flap)*9;ctx.strokeStyle='#0e0f14';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(15,13);ctx.quadraticCurveTo(4,-2-wing,0,12);ctx.moveTo(22,13);ctx.quadraticCurveTo(35,-2+wing,42,11);ctx.stroke();}
-  else {ctx.fillStyle='#34253f';ctx.beginPath();ctx.ellipse(19,13,11,7,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b388ff';ctx.fillRect(17,8,3,3);const wing=Math.sin(f.flap)*10;ctx.strokeStyle='#6c4a80';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(14,12);ctx.quadraticCurveTo(1,-4-wing,-5,12);ctx.moveTo(24,12);ctx.quadraticCurveTo(37,-4+wing,45,12);ctx.stroke();}
+  const beat=Math.sin(f.flap);ctx.lineJoin='round';ctx.lineCap='round';
+  if(f.type==='drone'){
+    ctx.strokeStyle='#09090b';ctx.lineWidth=3.5;ctx.beginPath();ctx.moveTo(7,8);ctx.lineTo(14,4);ctx.lineTo(41,5);ctx.lineTo(49,10);ctx.lineTo(44,24);ctx.lineTo(10,23);ctx.closePath();ctx.fillStyle='#efe6c8';ctx.fill();ctx.stroke();
+    ctx.fillStyle='#65cfad';ctx.strokeStyle='#09090b';ctx.lineWidth=2;ctx.fillRect(17,10,18,7);ctx.strokeRect(17,10,18,7);ctx.fillStyle='#ef4b3f';ctx.fillRect(39,11,5,5);
+    ctx.strokeStyle='#09090b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(12,7);ctx.lineTo(5,1);ctx.moveTo(43,7);ctx.lineTo(50,1);ctx.stroke();ctx.strokeStyle='#f3c84b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-5+beat*2,1);ctx.lineTo(15-beat*2,1);ctx.moveTo(40+beat*2,1);ctx.lineTo(60-beat*2,1);ctx.stroke();
+  }else if(f.type==='crow'){
+    ctx.fillStyle='#09090b';ctx.strokeStyle='#efe6c8';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(24,17,17,9,-.08,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.beginPath();ctx.arc(40,12,7,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#ef4b3f';ctx.strokeStyle='#09090b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(45,11);ctx.lineTo(55,15);ctx.lineTo(45,17);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.strokeStyle='#ef4b3f';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(22,17);ctx.quadraticCurveTo(8,-3-beat*10,1,12);ctx.moveTo(28,17);ctx.quadraticCurveTo(40,-2+beat*10,49,9);ctx.stroke();ctx.strokeStyle='#09090b';ctx.lineWidth=2;ctx.stroke();
+  }else{
+    ctx.fillStyle='#ef4b3f';ctx.strokeStyle='#09090b';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(26,16,10,8,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.beginPath();ctx.moveTo(18,15);ctx.quadraticCurveTo(7,-6-beat*11,-2,12);ctx.lineTo(8,10);ctx.lineTo(13,22);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(34,15);ctx.quadraticCurveTo(45,-6+beat*11,55,12);ctx.lineTo(44,10);ctx.lineTo(39,22);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.fillStyle='#efe6c8';ctx.strokeStyle='#09090b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(21,10);ctx.lineTo(23,3);ctx.lineTo(27,10);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(28,10);ctx.lineTo(32,3);ctx.lineTo(33,11);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#f3c84b';ctx.fillRect(23,13,3,3);ctx.fillRect(29,13,3,3);
+  }
   ctx.restore();
 }
 function drawBox(b){
@@ -1174,10 +1232,12 @@ function unlockPlaytestCosmetics(){
   save.cosmetics.equipped={skin:'skin_tiger',glasses:'glasses_laser',hat:'hat_cone'};wardrobePreview={...save.cosmetics.equipped};saveNow();renderWardrobe();updatePlaytestStatus('ALL COSMETICS');toast('PLAYTEST · WARDROBE UNLOCKED');
 }
 function healPlaytest(){if(game.state==='title'||game.state==='dead')ensurePlaytestRun();game.maxHearts=Math.max(game.maxHearts,baseMaxHearts(save));game.hearts=game.maxHearts;updateHud();updatePlaytestStatus('FULL HEAL');toast('PLAYTEST · FULL HEAL');}
+function spawnPlaytestFlyer(){ensurePlaytestRun();spawnFlying();if(flyers[0])flyers[0].x=W*.72;closePlaytest();updatePlaytestStatus('HIGH FLYER SPAWNED');}
+function spawnPlaytestBox(){ensurePlaytestRun();spawnBox();if(boxes[0]){boxes[0].x=cat.x+72;boxes[0].reward='cosmetic';}closePlaytest();updatePlaytestStatus('COSMETIC BOX SPAWNED');}
 
 if(playtestEnabled){
   document.documentElement.dataset.playtest='session-only';ui.playtestToggle.hidden=false;updatePlaytestStatus();
-  bindTap(ui.playtestToggle,openPlaytest);bindTap(ui.playtestClose,closePlaytest);bindTap(ui.playtestStreet,launchPlaytestStreet);bindTap(ui.playtestMode,()=>{toggleContentPresentation();updatePlaytestStatus('MODE TOGGLED');});bindTap(ui.playtestPacks,grantPlaytestPacks);bindTap(ui.playtestHeal,healPlaytest);bindTap(ui.playtestCosmetics,unlockPlaytestCosmetics);
+  bindTap(ui.playtestToggle,openPlaytest);bindTap(ui.playtestClose,closePlaytest);bindTap(ui.playtestStreet,launchPlaytestStreet);bindTap(ui.playtestMode,()=>{toggleContentPresentation();updatePlaytestStatus('MODE TOGGLED');});bindTap(ui.playtestPacks,grantPlaytestPacks);bindTap(ui.playtestHeal,healPlaytest);bindTap(ui.playtestFlyer,spawnPlaytestFlyer);bindTap(ui.playtestBox,spawnPlaytestBox);bindTap(ui.playtestCosmetics,unlockPlaytestCosmetics);
   document.querySelectorAll('[data-playtest-boss]').forEach(button=>bindTap(button,()=>launchPlaytestBoss(button)));
 }
 

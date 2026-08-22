@@ -12,7 +12,13 @@ import {
 } from '../src/rendering/code-art.js';
 
 function fakeContext() {
-  return new Proxy({}, {
+  const context = {
+    scale(...args) {
+      assert.equal(args.length, 2, 'CanvasRenderingContext2D.scale requires x and y arguments');
+      assert.ok(args.every(Number.isFinite), 'canvas scales must be finite');
+    },
+  };
+  return new Proxy(context, {
     get(target, key) {
       if (!(key in target)) target[key] = () => {};
       return target[key];
