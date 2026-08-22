@@ -10,6 +10,7 @@
 | Portability | Keep simulation, input actions, content, saves, and rendering boundaries separable | A later Capacitor wrapper or native-engine port does not require redesigning game rules. |
 | Alternate presentation | Add Little Baby Idiot Mode | Players may swap tobacco presentation for a candy content skin without changing mechanics. |
 | Save durability | Versioned local schema plus portable JSON backup | Existing browser progress migrates in place, corrupted current data may recover from the legacy key, and players can keep a copy outside browser storage. |
+| Playtest tooling | Explicit `?playtest=1` session-only lab | Testers can reach bosses, modes, and cosmetics instantly without writing cheats or test progress into the real browser save. |
 
 ## Distribution policy position
 

@@ -105,6 +105,15 @@
   #wrap.candy-mode #puffBtn,#wrap.candy-mode .modeToggle { background:#ff9bd5; }
   #wrap.candy-mode #cigFill { background:linear-gradient(90deg,#ff70b7,#ffd166,#80e1c1,#b388ff); }
   #closeCloset { width:100%; background:#80e1c1; }
+  [hidden] { display:none !important; }
+  #playtestToggle { position:absolute; z-index:31; right:10px; top:max(58px,calc(env(safe-area-inset-top) + 52px)); padding:7px 9px; color:#11131d; background:#ff7b72; border:2px solid #fff7; font-size:10px; }
+  #playtestPanel { position:absolute; z-index:30; right:10px; top:max(96px,calc(env(safe-area-inset-top) + 90px)); width:min(330px,calc(100vw - 20px)); max-height:calc(100vh - 118px); overflow:auto; padding:12px; color:var(--ui); background:#11131df2; border:2px solid #ff7b72; border-radius:15px; box-shadow:0 12px 42px #000c; pointer-events:auto; }
+  #playtestPanel h2 { margin:0 0 3px; color:#ff7b72; font-size:16px; }
+  #playtestStatus { margin:0 0 9px; color:#f7f0dca8; font-size:9px; line-height:1.4; }
+  .playtestGrid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+  .playtestGrid button { min-height:38px; padding:7px; box-shadow:none; font-size:9px; }
+  .playtestGrid .wide { grid-column:1/-1; }
+  #playtestClose { margin-top:8px; width:100%; padding:7px; background:#ff7b72; box-shadow:none; font-size:10px; }
   @media (max-width:760px) {
     .tree { grid-template-columns:1fr; }
     .cosGrid { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -138,6 +147,10 @@
     #startBtn { padding:12px; }
     #wrap.smoke-mode .stats { display:none; }
     #wrap.smoke-mode #smokeCard { top:13%; }
+    #wrap.smoke-mode #cigName { font-size:clamp(16px,4vw,21px); }
+    #wrap.smoke-mode #toast { top:54%; font-size:18px; }
+    #playtestToggle { top:6px; right:6px; padding:6px 8px; }
+    #playtestPanel { top:44px; max-height:calc(100vh - 52px); }
   }
 </style>
 </head>
@@ -175,6 +188,24 @@
       <button id="puffBtn">PUFF PUFF</button>
     </div>
   </div>
+
+  <button id="playtestToggle" hidden>PLAYTEST LAB</button>
+  <aside id="playtestPanel" aria-label="Session-only playtest controls" hidden>
+    <h2>PLAYTEST LAB</h2>
+    <div id="playtestStatus">SESSION ONLY · REAL SAVE PROTECTED</div>
+    <div class="playtestGrid">
+      <button data-playtest-boss="vapeLord" data-encounter="5">VAPE LORD</button>
+      <button data-playtest-boss="hookah" data-encounter="10">HOOKAH</button>
+      <button data-playtest-boss="bong" data-encounter="15">PHANTOM BONG</button>
+      <button data-playtest-boss="machine" data-encounter="20">CHAINSMOKER</button>
+      <button id="playtestStreet">NEXT STREET</button>
+      <button id="playtestMode">TOGGLE CANDY</button>
+      <button id="playtestPacks">GRANT 10 PACKS</button>
+      <button id="playtestHeal">FULL HEAL</button>
+      <button class="wide" id="playtestCosmetics">UNLOCK ALL COSMETICS</button>
+    </div>
+    <button id="playtestClose">HIDE LAB</button>
+  </aside>
 
   <div id="startScreen">
     <div class="startCard">
@@ -251,6 +282,7 @@
 </div>
 <script type="module">
 import { CONTENT_MODE, assertCompleteCandyRegistry, presentEncounter, toggleContentMode } from './src/content/content-modes.js';
+import { UPGRADE_RULES, baseMaxHearts, bossIndexForEncounter, bossPackReward, boxAshReward, boxRewardFromRoll, criticalChance, currentLevel, encounterAshReward, encounterMaxHp, hotStartRatio, meetsUnlockCondition, nextComboMultiplier, passiveDps, streetEncounterIndex, tapPower, upgradeCost } from './src/game/progression.js';
 import { recolorFurPixel, skinRgb } from './src/rendering/skin-palette.js';
 import { SAVE_VERSION, loadStoredSave, parseSaveBackup, serializeSaveBackup, writeStoredSave } from './src/state/save-schema.js';
 
@@ -276,29 +308,32 @@ const ui = {
   smokeTitle:$('smokeTitle'), cigName:$('cigName'), smokeMeta:$('smokeMeta'), jump:$('jumpBtn'), sprint:$('sprintBtn'), sprintText:$('sprintText'), puff:$('puffBtn'), upgrades:$('upgradeBtn'), style:$('styleBtn'), mute:$('muteBtn'), modal:$('modalShade'), shopAsh:$('shopAsh'), shopPacks:$('shopPacks'), shopStats:$('shopStats'), closeShop:$('closeShop'),
   closet:$('closetShade'), closetStats:$('closetStats'), closetPreview:$('closetPreview'), previewLoadout:$('previewLoadout'), skinGrid:$('skinGrid'), glassesGrid:$('glassesGrid'), hatGrid:$('hatGrid'), closeCloset:$('closeCloset'), startStyle:$('startStyleBtn'), startMode:$('startModeBtn'), closetMode:$('closetModeBtn'), exportSave:$('exportSaveBtn'), importSave:$('importSaveBtn'), importSaveFile:$('importSaveFile'),
   logo:$('gameLogo'), startTag:$('startTag'), startTiny:$('startTiny'), closetSub:$('closetSub'), shopTitle:$('shopTitle'), shopSub:$('shopSub'), passiveTitle:$('passiveTitle'), activeTitle:$('activeTitle'),
-  start:$('startScreen'), startBtn:$('startBtn'), gameOver:$('gameOver'), retry:$('retryBtn'), finalDist:$('finalDist'), finalText:$('finalText')
+  start:$('startScreen'), startBtn:$('startBtn'), gameOver:$('gameOver'), retry:$('retryBtn'), finalDist:$('finalDist'), finalText:$('finalText'),
+  playtestToggle:$('playtestToggle'), playtestPanel:$('playtestPanel'), playtestStatus:$('playtestStatus'), playtestStreet:$('playtestStreet'), playtestMode:$('playtestMode'), playtestPacks:$('playtestPacks'), playtestHeal:$('playtestHeal'), playtestCosmetics:$('playtestCosmetics'), playtestClose:$('playtestClose')
 };
 
+const playtestEnabled=new URLSearchParams(location.search).get('playtest')==='1';
 let saveStorage=null;try{saveStorage=localStorage;}catch(error){}
 const loadedSave=loadStoredSave(saveStorage);let save=loadedSave.save,saveStorageHealthy=true;
 function saveNow(){
+  if(playtestEnabled){document.documentElement.dataset.saveStatus='playtest-session';return true;}
   const ok=writeStoredSave(saveStorage,save);document.documentElement.dataset.saveStatus=ok?'ok':'session-only';
   if(!ok&&saveStorageHealthy)setTimeout(()=>toast('SAVE STORAGE BLOCKED · SESSION ONLY'),0);saveStorageHealthy=ok;return ok;
 }
-if(loadedSave.needsWrite)saveNow();
+if(loadedSave.needsWrite&&!playtestEnabled)saveNow();
 function isCandyMode(){ return save.contentMode===CONTENT_MODE.CANDY; }
 function ashLabel(){ return isCandyMode()?'SPRINKLES':'ASH'; }
 
 const upgradeDefs={
-  autoPuff:{kind:'ash',max:10,base:6,scale:1.65,desc:l=>`Passive +${(0.8*l).toFixed(1)} burn/sec`},
-  deepIdle:{kind:'ash',max:8,base:18,scale:1.8,desc:l=>`Passive x${(1+0.35*l).toFixed(2)}`},
-  hotStart:{kind:'ash',max:5,base:28,scale:2.05,desc:l=>`Start ${l*6}% already burned`},
-  bigDrag:{kind:'ash',max:10,base:5,scale:1.6,desc:l=>`Tap power ${(2.2+1.15*l).toFixed(2)}`},
-  crit:{kind:'ash',max:8,base:20,scale:1.85,desc:l=>`${Math.round(l*4.5)}% crit chance`},
-  combo:{kind:'ash',max:8,base:22,scale:1.85,desc:l=>`Combo cap x${(1+0.18*l).toFixed(2)}`},
-  lungs:{kind:'packs',max:3,base:2,scale:2.1,desc:l=>`Start with ${3+l} max hearts`},
-  scavenger:{kind:'packs',max:5,base:2,scale:1.9,desc:l=>`Box luck +${(l*14)}%`},
-  weird:{kind:'packs',max:5,base:1,scale:2.2,desc:l=>`Trip buffs +${l} sec`}
+  autoPuff:{...UPGRADE_RULES.autoPuff,desc:l=>`Passive +${(0.8*l).toFixed(1)} burn/sec`},
+  deepIdle:{...UPGRADE_RULES.deepIdle,desc:l=>`Passive x${(1+0.35*l).toFixed(2)}`},
+  hotStart:{...UPGRADE_RULES.hotStart,desc:l=>`Start ${l*6}% already burned`},
+  bigDrag:{...UPGRADE_RULES.bigDrag,desc:l=>`Tap power ${(2.2+1.15*l).toFixed(2)}`},
+  crit:{...UPGRADE_RULES.crit,desc:l=>`${Math.round(l*4.5)}% crit chance`},
+  combo:{...UPGRADE_RULES.combo,desc:l=>`Combo cap x${(1+0.18*l).toFixed(2)}`},
+  lungs:{...UPGRADE_RULES.lungs,desc:l=>`Start with ${3+l} max hearts`},
+  scavenger:{...UPGRADE_RULES.scavenger,desc:l=>`Box luck +${(l*14)}%`},
+  weird:{...UPGRADE_RULES.weird,desc:l=>`Trip buffs +${l} sec`}
 };
 const candyUpgradeNames={autoPuff:'AUTO MUNCH',deepIdle:'DEEP CHEW',hotStart:'FIRST BITE',bigDrag:'BIG BITE',crit:'LUCKY CRUNCH',combo:'CHAIN CHEW',lungs:'TOUGH TEETH',scavenger:'SCAVENGER',weird:'SUGAR TOLERANCE'};
 const candyUpgradeDesc={
@@ -313,14 +348,12 @@ const candyUpgradeDesc={
   weird:l=>`Sugar-trip buffs +${l} sec`
 };
 function upgradeDesc(k,l){ return isCandyMode()?candyUpgradeDesc[k](l):upgradeDefs[k].desc(l); }
-function upgradeCost(k){ const d=upgradeDefs[k], l=(save.up[k] ?? save.meta[k] ?? 0); return Math.ceil(d.base*Math.pow(d.scale,l)); }
-function currentLevel(k){ return (k in save.up)?save.up[k]:save.meta[k]; }
 function refreshShop(){
   ui.shopAsh.textContent=`${ashLabel()} ${Math.floor(save.ash)}`;
   ui.shopPacks.textContent=`PACKS ${Math.floor(save.packs)}`;
   ui.shopStats.textContent=`BEST ${Math.floor(save.best)} m · BOSSES ${save.bosses}`;
   document.querySelectorAll('.upgrade').forEach(btn=>{
-    const k=btn.dataset.up || btn.dataset.meta; const d=upgradeDefs[k]; const l=currentLevel(k); const cost=upgradeCost(k); const max=l>=d.max; const cur=d.kind==='ash'?save.ash:save.packs;
+    const k=btn.dataset.up || btn.dataset.meta; const d=upgradeDefs[k]; const l=currentLevel(save,k); const cost=upgradeCost(save,k); const max=l>=d.max; const cur=d.kind==='ash'?save.ash:save.packs;
     btn.querySelector('.uTop span:last-child').textContent=max?`MAX ${l}/${d.max}`:`LV ${l}/${d.max} · ${cost} ${d.kind==='ash'?ashLabel():d.kind.toUpperCase()}`;
     btn.querySelector('.desc').textContent=upgradeDesc(k,l)+(max?'':` → ${upgradeDesc(k,l+1)}`);
     btn.classList.toggle('afford',!max&&cur>=cost); btn.classList.toggle('maxed',max);
@@ -335,7 +368,7 @@ function bindTap(el,handler,{stop=true}={}){
   el.addEventListener('click',e=>{ if(performance.now()-inputState.lastDirect<500){ prepInputEvent(e,stop); return; } prepInputEvent(e,stop); handler(e); });
 }
 function buyUpgrade(btn){
-  const k=btn.dataset.up || btn.dataset.meta; const d=upgradeDefs[k]; const levelRef=btn.dataset.meta ? save.meta : save.up; const cur=d.kind==='ash'?save.ash:save.packs; const cost=upgradeCost(k);
+  const k=btn.dataset.up || btn.dataset.meta; const d=upgradeDefs[k]; const levelRef=btn.dataset.meta ? save.meta : save.up; const cur=d.kind==='ash'?save.ash:save.packs; const cost=upgradeCost(save,k);
   if(levelRef[k]>=d.max){ sfx('deny'); return; }
   if(cur<cost){ sfx('deny'); toast('NOT ENOUGH '+(d.kind==='ash'?ashLabel():d.kind.toUpperCase())); return; }
   if(d.kind==='ash') save.ash-=cost; else save.packs-=cost;
@@ -474,10 +507,8 @@ function unlockCosmetic(item,reason='UNLOCKED'){
   if(!item || ownsCosmetic(item.id)) return false;
   save.cosmetics.unlocked.push(item.id); saveNow(); sfx('unlock'); toast(`${reason}: ${modeCopy(item.name)}`); return true;
 }
-function statValue(stat){ if(stat==='best'||stat==='smoked'||stat==='bosses'||stat==='runs') return save[stat]||0; return save.stats[stat]||0; }
-function conditionMet(item){ const src=item.source||{}; if(src.type==='default') return true; if(src.type==='stat') return statValue(src.stat)>=src.value; if(src.type==='boss') return (save.bossWins[src.boss]||0)>=src.count; return false; }
 function checkCosmeticUnlocks(){
-  let got=false; for(const item of ALL_COSMETICS){ if(!ownsCosmetic(item.id) && conditionMet(item)) got=unlockCosmetic(item,'ACHIEVEMENT UNLOCK')||got; } if(got) renderWardrobe();
+  let got=false; for(const item of ALL_COSMETICS){ if(!ownsCosmetic(item.id) && meetsUnlockCondition(save,item.source)) got=unlockCosmetic(item,'ACHIEVEMENT UNLOCK')||got; } if(got) renderWardrobe();
 }
 function findCosmeticPool(){ return ALL_COSMETICS.filter(x=>x.source?.type==='find'&&!ownsCosmetic(x.id)); }
 function unlockRandomFindCosmetic(){ const pool=findCosmeticPool(); if(!pool.length){ save.packs+=1; saveNow(); toast('DUPLICATE DROP → +1 PACK'); sfx('unlock'); return; } const item=pool[(Math.random()*pool.length)|0]; save.stats.cosmeticFinds++; unlockCosmetic(item,'RARE STREET FIND'); renderWardrobe(); }
@@ -504,17 +535,16 @@ for(let i=0;i<85;i++) stars.push({x:Math.random()*2400,y:Math.random()*.55,sz:1+
 function districtIndex(){ return Math.min(DISTRICTS.length-1, Math.floor(game.distance/450)); }
 function district(){ return DISTRICTS[districtIndex()]; }
 function phaseHazardMult(){ return district().hazard; }
-function baseMaxHearts(){ return 3 + save.meta.lungs; }
 function buffLabel(){
   const out=[]; if(game.ghostTime>0) out.push(isCandyMode()?'SUGAR GHOST':'GHOST'); if(game.speedBoostTime>0) out.push('SPEED'); if(game.ashMult>1.01) out.push(ashLabel()+' x'+game.ashMult.toFixed(1)); return out.length?out.join(' · '):'NO BUFFS';
 }
 function weightedSmoke(encounterNo=game.encounters+1){
-  if(encounterNo%5===0){ return {...BOSS_SMOKES[((encounterNo/5)-1)%BOSS_SMOKES.length|0], boss:true}; }
-  const idx=Math.floor(Math.random()*SMOKES.length);
-  return {...SMOKES[idx], boss:false};
+  const bossIndex=bossIndexForEncounter(encounterNo,BOSS_SMOKES.length);
+  if(bossIndex>=0) return {...BOSS_SMOKES[bossIndex],boss:true};
+  return {...SMOKES[streetEncounterIndex(Math.random(),SMOKES.length)],boss:false};
 }
 function resetRun(){
-  game.state='run'; game.paused=false; game.distance=0; game.baseSpeed=250; game.speed=250; game.worldX=0; game.maxHearts=baseMaxHearts(); game.hearts=game.maxHearts; game.nextSmoke=110+Math.random()*40; game.nextObstacle=35; game.nextFlying=65; game.nextBox=55; game.inv=0; game.runTime=0; game.combo=1; game.comboTimer=0; game.lastPuff=0; game.shake=0; game.encounters=0; game.bossPhase=0; game.smokeable=null; game.nextSmokeable=weightedSmoke(1); game.cigHp=0; game.cigMax=0; game.ashMult=1; game.ghostTime=0; game.speedBoostTime=0; game.psyTime=0; game.tmpHeartCap=0; game.sprintHeld=false; game.sprintEnergy=1; game.sprintActive=false; game.nearMisses=0;
+  game.state='run'; game.paused=false; game.distance=0; game.baseSpeed=250; game.speed=250; game.worldX=0; game.maxHearts=baseMaxHearts(save); game.hearts=game.maxHearts; game.nextSmoke=110+Math.random()*40; game.nextObstacle=35; game.nextFlying=65; game.nextBox=55; game.inv=0; game.runTime=0; game.combo=1; game.comboTimer=0; game.lastPuff=0; game.shake=0; game.encounters=0; game.bossPhase=0; game.smokeable=null; game.nextSmokeable=weightedSmoke(1); game.cigHp=0; game.cigMax=0; game.ashMult=1; game.ghostTime=0; game.speedBoostTime=0; game.psyTime=0; game.tmpHeartCap=0; game.sprintHeld=false; game.sprintEnergy=1; game.sprintActive=false; game.nearMisses=0;
   obstacles=[]; flyers=[]; boxes=[]; particles=[]; smokePuffs=[]; cat.y=groundY-26; cat.vy=0; cat.onGround=true; cat.frame=0; cat.launchTime=0; cat.landTime=0; cat.puffTime=0; ui.gameOver.style.display='none'; setAction('run'); updateHud(); save.runs=(save.runs||0)+1; saveNow();
 }
 function setAction(state){
@@ -534,14 +564,11 @@ function setSprint(on){
 function jump(){ if(game.state!=='run'||game.paused) return; if(cat.onGround){ cat.vy=-560; cat.onGround=false; cat.launchTime=.12; cat.landTime=0; sfx('jump'); burst(cat.x,groundY-4,'dust',7); } }
 function beginSmoke(){
   game.state='smoke'; cat.y=groundY-26; cat.vy=0; cat.onGround=true; cat.launchTime=0; cat.landTime=0; cat.puffTime=0; setAction('smoke'); game.encounters++; game.smokeable=game.nextSmokeable || weightedSmoke(game.encounters); game.nextSmokeable=null; game.bossPhase=0;
-  const hpBase=85 + game.encounters*17 + Math.min(130,game.distance*.026);
-  game.cigMax=hpBase*game.smokeable.hp*(game.smokeable.boss?1.15:1);
-  const hot=Math.min(.3,save.up.hotStart*.06); game.cigHp=game.cigMax*(1-hot); game.combo=1; game.comboTimer=0;
+  game.cigMax=encounterMaxHp({encounters:game.encounters,distance:game.distance,hpMultiplier:game.smokeable.hp,boss:game.smokeable.boss});
+  const hot=hotStartRatio(save); game.cigHp=game.cigMax*(1-hot); game.combo=1; game.comboTimer=0;
   refreshEncounterCopy();
   sfx(game.smokeable.boss?'bossStart':'encounter'); toast(game.smokeable.boss?(isCandyMode()?'BOSS TREAT':'BOSS SMOKE'):(isCandyMode()?'SNACK BREAK':'SMOKE BREAK')); updateSmokeUI();
 }
-function passiveDps(){ const base=save.up.autoPuff*.8; return base*(1+save.up.deepIdle*.35); }
-function tapPower(){ return 2.2+save.up.bigDrag*1.15; }
 function smokePhaseCheck(){
   if(!game.smokeable || !game.smokeable.boss) return;
   const pct=game.cigHp/game.cigMax;
@@ -557,8 +584,8 @@ function puffSoundKind(){
 }
 function puff(manual=true){
   if(game.state!=='smoke'||game.paused||game.cigHp<=0) return;
-  let dmg=manual?tapPower():0; let crit=false;
-  if(manual){ const now=performance.now(); if(now-game.lastPuff<390 && save.up.combo>0){ game.combo=Math.min(1+save.up.combo*.18,game.combo+.07+save.up.combo*.008); } else game.combo=Math.max(1,game.combo*.72); game.lastPuff=now; game.comboTimer=.72; if(Math.random()<save.up.crit*.045){ dmg*=3; crit=true; } dmg*=game.combo; }
+  let dmg=manual?tapPower(save):0; let crit=false;
+  if(manual){ const now=performance.now(); game.combo=nextComboMultiplier(game.combo,save.up.combo,now-game.lastPuff<390); game.lastPuff=now; game.comboTimer=.72; if(Math.random()<criticalChance(save)){ dmg*=3; crit=true; } dmg*=game.combo; }
   if(manual&&cat.puffTime<.13) cat.puffTime=.34;
   if(game.smokeable && game.smokeable.boss){ if(game.bossPhase===1) dmg*=1.08; if(game.bossPhase===2) dmg*=1.18; }
   game.cigHp=Math.max(0,game.cigHp-dmg); smokeBurst(crit?12:6); sfx(crit?'crit':puffSoundKind()); if(crit) toast(isCandyMode()?'CRIT BITE':'CRIT PUFF'); smokePhaseCheck(); updateSmokeUI(); if(game.cigHp<=0) finishSmoke();
@@ -566,7 +593,7 @@ function puff(manual=true){
 function heal(amount=1){ const old=game.hearts; game.hearts=Math.min(game.maxHearts, game.hearts+amount); if(game.hearts>old){ sfx('heal'); toast('+'+(game.hearts-old)+' HEART'); } }
 function healthBoost(){ if(game.hearts>=game.maxHearts && game.maxHearts<6){ game.maxHearts++; game.hearts++; toast('MAX HEART +1'); sfx('heal'); } else heal(1); }
 function applyBoxReward(reward){
-  if(reward==='ash'){ const gain=Math.round((14+Math.random()*18)*(1+save.meta.scavenger*.08)); save.ash+=gain; saveNow(); toast(`BOX +${gain} ${ashLabel()}`); sfx('pickup'); burst(cat.x,cat.y-35,'spark',10); }
+  if(reward==='ash'){ const gain=boxAshReward(Math.random(),save.meta.scavenger); save.ash+=gain; saveNow(); toast(`BOX +${gain} ${ashLabel()}`); sfx('pickup'); burst(cat.x,cat.y-35,'spark',10); }
   else if(reward==='heart'){ heal(1); burst(cat.x,cat.y-35,'heal',12); }
   else if(reward==='speed'){ game.speedBoostTime= Math.max(game.speedBoostTime,0) + 4 + save.meta.weird*.25; toast('SPEED RUSH'); sfx('power'); }
   else if(reward==='ghost'){ const dur=5+save.meta.weird; game.ghostTime=Math.max(game.ghostTime,dur); game.psyTime=Math.max(game.psyTime,dur); game.ashMult=Math.max(game.ashMult,1.35); save.stats.ghostTrips++; saveNow(); checkCosmeticUnlocks(); toast(isCandyMode()?'SUGAR TRIP':'GHOST SMOKE'); sfx('trip'); }
@@ -575,16 +602,15 @@ function applyBoxReward(reward){
 }
 function finishSmoke(){
   if(game.state!=='smoke' || !game.smokeable) return;
-  let reward=Math.round((8+game.encounters*3+Math.sqrt(game.distance)*.22)*game.smokeable.reward*game.ashMult*(1+save.meta.scavenger*.05));
   let packGain=0;
   const e=game.smokeable.effect;
+  const reward=encounterAshReward({encounters:game.encounters,distance:game.distance,rewardMultiplier:game.smokeable.reward,ashMultiplier:game.ashMult,scavengerLevel:save.meta.scavenger,bonusAsh:e==='ash'||e==='bossAsh'});
   if(e==='speed' || e==='bossSpeed'){ game.speedBoostTime=Math.max(game.speedBoostTime,0)+5+save.meta.weird*.35; }
   if(e==='heal' || e==='bossHeal'){ heal(1); }
   if(e==='healthup'){ healthBoost(); }
   if(e==='ghost' || e==='bossGhost'){ const dur=6+save.meta.weird; game.ghostTime=Math.max(game.ghostTime,dur); game.psyTime=Math.max(game.psyTime,dur); game.ashMult=Math.max(game.ashMult,1.45); save.stats.ghostTrips++; }
-  if(e==='ash' || e==='bossAsh'){ reward += Math.round(18 + game.encounters*2); }
   if(e==='combo'){ game.combo=1.35+save.up.combo*.06; game.comboTimer=4; }
-  if(game.smokeable.boss){ packGain=1 + ((game.encounters%10===0)?1:0); save.bosses++; save.packs += packGain; const v=game.smokeable.visual; if(v in save.bossWins) save.bossWins[v]++; }
+  if(game.smokeable.boss){ packGain=bossPackReward(game.encounters); save.bosses++; save.packs += packGain; const v=game.smokeable.visual; if(v in save.bossWins) save.bossWins[v]++; }
   save.ash += reward; save.smoked++; saveNow(); checkCosmeticUnlocks(); updateHud(); toast(`+${reward} ${ashLabel()}${packGain?` · +${packGain} PACK`:''}`); sfx(game.smokeable.boss?'bossClear':'clear'); burst(cat.x+50,groundY-45,'spark',18);
   setTimeout(()=>{ if(game.state==='smoke'){ game.state='run'; game.nextSmoke=game.distance+175+Math.random()*120; game.nextSmokeable=weightedSmoke(game.encounters+1); game.nextObstacle=game.distance+35; game.nextFlying=game.distance+55; setAction('run'); } },420);
 }
@@ -592,7 +618,7 @@ function hit(){ if(game.inv>0||game.state!=='run'||game.ghostTime>0) return; gam
 function endRun(){ game.state='dead'; save.best=Math.max(save.best,Math.floor(game.distance)); save.stats.totalDistance+=Math.floor(game.distance); saveNow(); checkCosmeticUnlocks(); setAction('none'); ui.finalDist.textContent=`${Math.floor(game.distance)} m`; ui.finalText.textContent=`Best ${Math.floor(save.best)} m · ${save.smoked} ${isCandyMode()?'treats':'smokeables'} cleared · ${save.bosses} bosses cooked · PACKS ${save.packs}`; ui.gameOver.style.display='flex'; sfx('dead'); }
 
 function updateHud(){ ui.dist.textContent=`${Math.floor(game.distance)} m`; ui.ash.textContent=`${ashLabel()} ${Math.floor(save.ash)}`; ui.packs.textContent=`PACKS ${Math.floor(save.packs)}`; ui.hearts.textContent='♥'.repeat(Math.max(0,game.hearts))+'♡'.repeat(Math.max(0,Math.max(game.maxHearts,3)-game.hearts)); ui.phase.textContent=district().name; ui.buff.textContent=buffLabel(); ui.sprintText.textContent=`SPRINT ${Math.round(game.sprintEnergy*100)}%`; ui.sprint.textContent=game.sprintEnergy<.05?'RECHARGE':'HOLD SPRINT'; }
-function updateSmokeUI(){ const r=game.cigMax?game.cigHp/game.cigMax:0; ui.cigFill.style.transform=`scaleX(${Math.max(0,r)})`; const phaseText = game.smokeable && game.smokeable.boss ? ` · phase ${game.bossPhase+1}` : ''; ui.puffReadout.textContent=`${Math.ceil(game.cigHp)} ${isCandyMode()?'bites':'burn'} left${phaseText} · passive ${passiveDps().toFixed(1)}/s · ${isCandyMode()?'bite':'tap'} ${(tapPower()*game.combo).toFixed(1)}${game.combo>1.01?` · combo x${game.combo.toFixed(2)}`:''}`; }
+function updateSmokeUI(){ const r=game.cigMax?game.cigHp/game.cigMax:0; ui.cigFill.style.transform=`scaleX(${Math.max(0,r)})`; const phaseText = game.smokeable && game.smokeable.boss ? ` · phase ${game.bossPhase+1}` : ''; ui.puffReadout.textContent=`${Math.ceil(game.cigHp)} ${isCandyMode()?'bites':'burn'} left${phaseText} · passive ${passiveDps(save).toFixed(1)}/s · ${isCandyMode()?'bite':'tap'} ${(tapPower(save)*game.combo).toFixed(1)}${game.combo>1.01?` · combo x${game.combo.toFixed(2)}`:''}`; }
 function toast(t){ ui.toast.textContent=t; ui.toast.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>ui.toast.classList.remove('show'),760); }
 
 function spawnObstacle(){
@@ -610,15 +636,7 @@ function spawnFlying(){
 }
 function flyY(f){ return f.baseY + Math.sin(f.phase)*f.amp + Math.sin(f.phase*.47+f.wave2)*f.amp*.14; }
 function chooseBoxReward(){
-  const luck = save.meta.scavenger*0.06;
-  const r=Math.random();
-  const findChance=(findCosmeticPool().length?0.045:0)+save.meta.scavenger*.008;
-  if(r<findChance) return 'cosmetic';
-  if(r<0.26+luck) return 'ash';
-  if(r<0.42+luck) return 'heart';
-  if(r<0.57+luck) return 'speed';
-  if(r<0.68+luck) return 'ghost';
-  return 'empty';
+  return boxRewardFromRoll(Math.random(),save.meta.scavenger,findCosmeticPool().length>0);
 }
 function spawnBox(){
   // Always overhead, always reachable by a committed jump/headbutt, never sitting on the road.
@@ -678,7 +696,7 @@ function update(dt){
     obstacles=obstacles.filter(o=>o.x>-120); flyers=flyers.filter(f=>f.x>-120); boxes=boxes.filter(b=>b.x>-120 && !b.hit);
   } else if(game.state==='smoke'){
     cat.puffTime=Math.max(0,cat.puffTime-dt);
-    const dps=passiveDps(); if(dps>0 && game.cigHp>0){ let burn=dps*dt; if(game.smokeable && game.smokeable.boss && game.bossPhase===2) burn*=1.15; game.cigHp=Math.max(0,game.cigHp-burn); if(Math.random()<dt*dps*.24) smokeBurst(1); smokePhaseCheck(); if(game.cigHp<=0) finishSmoke(); }
+    const dps=passiveDps(save); if(dps>0 && game.cigHp>0){ let burn=dps*dt; if(game.smokeable && game.smokeable.boss && game.bossPhase===2) burn*=1.15; game.cigHp=Math.max(0,game.cigHp-burn); if(Math.random()<dt*dps*.24) smokeBurst(1); smokePhaseCheck(); if(game.cigHp<=0) finishSmoke(); }
     updateSmokeUI(); cat.frame+=dt*3;
   }
   for(const p of particles){ p.t+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=300*dt; }
@@ -1134,8 +1152,8 @@ function sfx(kind){ if(!audio||save.muted)return; const n=audio.ctx.currentTime+
   else if(kind==='unlock'){[72,79,84,91].forEach((q,i)=>osc(midi(q),n+i*.045,.16,'square',.04,audio.fx));noise(n,.18,.025,audio.fx,3500)}
   else if(kind==='equip'){osc(660,n,.07,'triangle',.03,audio.fx,820);osc(990,n+.04,.09,'triangle',.025,audio.fx)} }
 
-function openCloset(){ if(game.state==='run'||game.state==='smoke')game.paused=true; setSprint(false); stopPuffHold(); wardrobePreview={...save.cosmetics.equipped}; checkCosmeticUnlocks(); renderWardrobe(); ui.closet.style.display='block'; sfx('equip'); }
-function closeCloset(){ ui.closet.style.display='none'; if(game.state==='run'||game.state==='smoke')game.paused=false; }
+function openCloset(){ if(game.state==='run'||game.state==='smoke')game.paused=true; setSprint(false); stopPuffHold(); wardrobePreview={...save.cosmetics.equipped}; checkCosmeticUnlocks(); renderWardrobe(); ui.closet.style.display='block'; if(playtestEnabled){ui.playtestToggle.hidden=true;ui.playtestPanel.hidden=true;} sfx('equip'); }
+function closeCloset(){ ui.closet.style.display='none'; if(playtestEnabled)ui.playtestToggle.hidden=false; if(game.state==='run'||game.state==='smoke')game.paused=false; }
 function downloadSaveBackup(){
   const blob=new Blob([serializeSaveBackup(save)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
   link.href=url;link.download=`smoke-break-cat-save-v${SAVE_VERSION}-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),0);toast('SAVE BACKUP DOWNLOADED');sfx('pickup');
@@ -1145,15 +1163,53 @@ async function restoreSaveBackup(){
   try{
     const restored=parseSaveBackup(await file.text());save=restored;wardrobePreview={...save.cosmetics.equipped};const persisted=saveNow();
     if(audio)audio.master.gain.setTargetAtTime(save.muted?0:.62,audio.ctx.currentTime,.02);ui.mute.textContent=save.muted?'×':'♫';syncContentModeUI();checkCosmeticUnlocks();renderWardrobe();updateHud();
-    toast(persisted?'SAVE BACKUP RESTORED':'RESTORED FOR SESSION · STORAGE BLOCKED');sfx('unlock');
+    toast(playtestEnabled?'RESTORED FOR PLAYTEST SESSION':persisted?'SAVE BACKUP RESTORED':'RESTORED FOR SESSION · STORAGE BLOCKED');sfx('unlock');
   }catch(error){toast('BACKUP REJECTED · INVALID SAVE');sfx('deny');}
 }
-function openShop(){ if(game.state==='title'||game.state==='dead')return; game.paused=true; setSprint(false); stopPuffHold(); refreshShop(); ui.modal.style.display='block'; sfx('buy'); }
-function closeShop(){ ui.modal.style.display='none'; game.paused=false; }
+function openShop(){ if(game.state==='title'||game.state==='dead')return; game.paused=true; setSprint(false); stopPuffHold(); refreshShop(); ui.modal.style.display='block'; if(playtestEnabled){ui.playtestToggle.hidden=true;ui.playtestPanel.hidden=true;} sfx('buy'); }
+function closeShop(){ ui.modal.style.display='none'; if(playtestEnabled)ui.playtestToggle.hidden=false; game.paused=false; }
 function toggleMute(){ initAudio(); save.muted=!save.muted; if(audio) audio.master.gain.setTargetAtTime(save.muted?0:.62,audio.ctx.currentTime,.02); ui.mute.textContent=save.muted?'×':'♫'; saveNow(); }
 function startGame(){ initAudio(); if(audio && audio.ctx.state==='suspended') audio.ctx.resume(); ui.start.style.display='none'; resetRun(); }
 function retryGame(){ initAudio(); if(audio && audio.ctx.state==='suspended') audio.ctx.resume(); resetRun(); }
 function gameplayAction(){ if(game.paused)return; if(game.state==='run')jump(); else if(game.state==='smoke')puff(true); }
+
+let playtestStreetCursor=0;
+function updatePlaytestStatus(message='REAL SAVE PROTECTED'){
+  if(!playtestEnabled)return;
+  const state=game.smokeable?modeCopy(game.smokeable.name):game.state.toUpperCase();
+  ui.playtestStatus.textContent=`SESSION ONLY · ${message} · ${state} · PACKS ${save.packs}`;
+}
+function openPlaytest(){if(game.state==='run'||game.state==='smoke'){game.paused=true;setSprint(false);stopPuffHold();}ui.playtestPanel.hidden=false;updatePlaytestStatus();}
+function closePlaytest(){ui.playtestPanel.hidden=true;if(game.state==='run'||game.state==='smoke')game.paused=false;}
+function ensurePlaytestRun(){
+  ui.start.style.display='none';ui.gameOver.style.display='none';ui.modal.style.display='none';ui.closet.style.display='none';
+  if(game.state==='title'||game.state==='dead')resetRun();
+  game.state='run';game.paused=false;game.smokeable=null;game.nextSmokeable=null;setAction('run');
+  obstacles=[];flyers=[];boxes=[];particles=[];smokePuffs=[];
+}
+function launchPlaytestEncounter(smoke,encounterNumber){
+  ensurePlaytestRun();game.distance=Math.max(1,encounterNumber*175);game.encounters=Math.max(0,encounterNumber-1);game.nextSmokeable={...smoke,boss:!!smoke.boss};beginSmoke();closePlaytest();updatePlaytestStatus('ENCOUNTER LOADED');
+}
+function launchPlaytestBoss(button){
+  const smoke=BOSS_SMOKES.find(item=>item.id===button.dataset.playtestBoss);if(!smoke)return;
+  launchPlaytestEncounter({...smoke,boss:true},Number(button.dataset.encounter)||5);
+}
+function launchPlaytestStreet(){
+  const smoke=SMOKES[playtestStreetCursor%SMOKES.length];playtestStreetCursor++;
+  launchPlaytestEncounter({...smoke,boss:false},Math.max(1,playtestStreetCursor));
+}
+function grantPlaytestPacks(){save.packs+=10;saveNow();updateHud();renderWardrobe();updatePlaytestStatus('+10 PACKS');toast('PLAYTEST · +10 PACKS');}
+function unlockPlaytestCosmetics(){
+  save.cosmetics.unlocked=[...new Set([...save.cosmetics.unlocked,...ALL_COSMETICS.map(item=>item.id)])];
+  save.cosmetics.equipped={skin:'skin_tiger',glasses:'glasses_laser',hat:'hat_cone'};wardrobePreview={...save.cosmetics.equipped};saveNow();renderWardrobe();updatePlaytestStatus('ALL COSMETICS');toast('PLAYTEST · WARDROBE UNLOCKED');
+}
+function healPlaytest(){if(game.state==='title'||game.state==='dead')ensurePlaytestRun();game.maxHearts=Math.max(game.maxHearts,baseMaxHearts(save));game.hearts=game.maxHearts;updateHud();updatePlaytestStatus('FULL HEAL');toast('PLAYTEST · FULL HEAL');}
+
+if(playtestEnabled){
+  document.documentElement.dataset.playtest='session-only';ui.playtestToggle.hidden=false;updatePlaytestStatus();
+  bindTap(ui.playtestToggle,openPlaytest);bindTap(ui.playtestClose,closePlaytest);bindTap(ui.playtestStreet,launchPlaytestStreet);bindTap(ui.playtestMode,()=>{toggleContentPresentation();updatePlaytestStatus('MODE TOGGLED');});bindTap(ui.playtestPacks,grantPlaytestPacks);bindTap(ui.playtestHeal,healPlaytest);bindTap(ui.playtestCosmetics,unlockPlaytestCosmetics);
+  document.querySelectorAll('[data-playtest-boss]').forEach(button=>bindTap(button,()=>launchPlaytestBoss(button)));
+}
 
 bindTap(ui.upgrades,openShop); bindTap(ui.style,openCloset); bindTap(ui.startStyle,openCloset); bindTap(ui.startMode,toggleContentPresentation); bindTap(ui.closetMode,toggleContentPresentation); bindTap(ui.exportSave,downloadSaveBackup); bindTap(ui.importSave,()=>ui.importSaveFile.click()); ui.importSaveFile.addEventListener('change',restoreSaveBackup); bindTap(ui.closeCloset,closeCloset); bindTap(ui.closeShop,closeShop); ui.mute.textContent=save.muted?'×':'♫'; bindTap(ui.mute,toggleMute); bindTap(ui.start,startGame); bindTap(ui.retry,retryGame); bindTap(ui.jump,jump); bindTap(canvas,gameplayAction,{stop:false});
 function sprintDown(e){ prepInputEvent(e,true); setSprint(true); }
