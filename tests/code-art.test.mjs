@@ -9,6 +9,7 @@ import {
   drawCodeHat,
   drawTitleMascot,
   drawWardrobeMascot,
+  sampleCodeCatRunPose,
 } from '../src/rendering/code-art.js';
 
 function fakeContext() {
@@ -40,6 +41,19 @@ test('exports one reusable code-native mascot system', () => {
   assert.equal(typeof drawCosmeticThumbnail, 'function');
   assert.equal(typeof drawTitleMascot, 'function');
   assert.equal(typeof drawWardrobeMascot, 'function');
+});
+
+test('runs with contralateral arm and leg phases', () => {
+  for (let key=0; key<CAT_RUN_KEY_COUNT; key++) {
+    const pose=sampleCodeCatRunPose(key);
+    const farArm=pose.arms[0][4]-pose.arms[0][0];
+    const nearArm=pose.arms[1][4]-pose.arms[1][0];
+    const farLeg=pose.legs[0][4]-pose.legs[0][0];
+    const nearLeg=pose.legs[1][4]-pose.legs[1][0];
+    assert.equal(Math.sign(farArm),-Math.sign(nearArm),'arms must pump in opposite directions');
+    assert.equal(Math.sign(farArm),-Math.sign(farLeg),'far arm must oppose far leg');
+    assert.equal(Math.sign(nearArm),-Math.sign(nearLeg),'near arm must oppose near leg');
+  }
 });
 
 test('renders every skin and equippable without a raster dependency', () => {
