@@ -14,6 +14,7 @@ Turn the playable prototype into a reliable public web alpha on GitHub Pages, th
 - A generated character/VFX direction board defines the target silhouette, palette, layering, and effects language; identity-locked character cycles plus production hazard, loot, eyewear, hat, and paired Original/Candy encounter-device atlases now implement that direction in the runtime.
 - Full modularization, broader automated gameplay coverage, accessibility work, and visual production remain active roadmap items.
 - The visual-overhaul slice now covers the hero, run/action animation, pose-aware skin recoloring, hazards, loot, cosmetics, environment motion, encounter staging, and every encounter prop. Save/progression extraction and broader visual regression coverage are the next major production gaps.
+- Versioned save migration, corrupt-save recovery, storage-failure fallback, and manual JSON backup/restore are now implemented behind a tested adapter while preserving both historical browser keys. Progression-rule extraction and broader visual regression coverage remain active gaps.
 
 ## Non-negotiable launch gates
 

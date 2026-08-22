@@ -97,6 +97,11 @@
   .closetLegend { background:#0d1019; border:1px solid #ffffff14; border-radius:12px; padding:9px 11px; font-size:10px; opacity:.8; line-height:1.45; margin-bottom:10px; }
   .modeToggle { width:100%; margin:0 0 10px; background:#ffd166; }
   .modeHint { margin:-3px 0 11px; text-align:center; font-size:10px; opacity:.72; line-height:1.4; }
+  .saveTools { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 0 12px; padding:10px; background:#0d1019; border:1px solid #ffffff14; border-radius:12px; }
+  .saveTools button { min-height:44px; box-shadow:none; font-size:11px; }
+  #exportSaveBtn { background:#80e1c1; }
+  #importSaveBtn { background:#b388ff; }
+  .saveStatus { grid-column:1/-1; color:#f7f0dc99; text-align:center; font-size:9px; line-height:1.4; }
   #wrap.candy-mode #puffBtn,#wrap.candy-mode .modeToggle { background:#ff9bd5; }
   #wrap.candy-mode #cigFill { background:linear-gradient(90deg,#ff70b7,#ffd166,#80e1c1,#b388ff); }
   #closeCloset { width:100%; background:#80e1c1; }
@@ -112,6 +117,8 @@
     .closetStats { text-align:left; }
     .closetPreview { grid-template-columns:1fr; }
     #closetPreview { height:116px; }
+    .saveTools { grid-template-columns:1fr; }
+    .saveStatus { grid-column:1; }
   }
   @media (max-width:360px) {
     .top { left:8px; right:8px; gap:4px; }
@@ -200,6 +207,12 @@
       <div class="closetLegend">UNLOCK PATHS: ACHIEVEMENT = permanent stat milestone · BOSS = specific boss/milestone · STREET FIND = rare overhead loot-box cosmetic · PACKS = buy permanently. Tap any owned cosmetic to equip it.</div>
       <button class="modeToggle" id="closetModeBtn">LITTLE BABY IDIOT MODE: OFF</button>
       <div class="modeHint">Candy-coats every encounter prop and label. Same game, same balance, less cool.</div>
+      <div class="saveTools">
+        <button id="exportSaveBtn">DOWNLOAD SAVE BACKUP</button>
+        <button id="importSaveBtn">RESTORE SAVE BACKUP</button>
+        <input id="importSaveFile" type="file" accept="application/json,.json" hidden />
+        <div class="saveStatus">VERSIONED SAVE · AUTOMATIC LEGACY MIGRATION · MANUAL BACKUP</div>
+      </div>
       <div class="closetSection"><h3>CAT TYPES · 12</h3><div class="cosGrid" id="skinGrid"></div></div>
       <div class="closetSection"><h3>GLASSES · 12</h3><div class="cosGrid" id="glassesGrid"></div></div>
       <div class="closetSection"><h3>HATS · 12</h3><div class="cosGrid" id="hatGrid"></div></div>
@@ -237,8 +250,9 @@
   </div>
 </div>
 <script type="module">
-import { CONTENT_MODE, assertCompleteCandyRegistry, normalizeContentMode, presentEncounter, toggleContentMode } from './src/content/content-modes.js';
+import { CONTENT_MODE, assertCompleteCandyRegistry, presentEncounter, toggleContentMode } from './src/content/content-modes.js';
 import { recolorFurPixel, skinRgb } from './src/rendering/skin-palette.js';
+import { SAVE_VERSION, loadStoredSave, parseSaveBackup, serializeSaveBackup, writeStoredSave } from './src/state/save-schema.js';
 
 (() => {
 'use strict';
@@ -260,25 +274,18 @@ const $ = id => document.getElementById(id);
 const ui = {
   dist:$('distText'), ash:$('ashText'), packs:$('packText'), hearts:$('heartText'), phase:$('phaseText'), buff:$('buffText'), smoke:$('smokeCard'), cigFill:$('cigFill'), puffReadout:$('puffReadout'), toast:$('toast'),
   smokeTitle:$('smokeTitle'), cigName:$('cigName'), smokeMeta:$('smokeMeta'), jump:$('jumpBtn'), sprint:$('sprintBtn'), sprintText:$('sprintText'), puff:$('puffBtn'), upgrades:$('upgradeBtn'), style:$('styleBtn'), mute:$('muteBtn'), modal:$('modalShade'), shopAsh:$('shopAsh'), shopPacks:$('shopPacks'), shopStats:$('shopStats'), closeShop:$('closeShop'),
-  closet:$('closetShade'), closetStats:$('closetStats'), closetPreview:$('closetPreview'), previewLoadout:$('previewLoadout'), skinGrid:$('skinGrid'), glassesGrid:$('glassesGrid'), hatGrid:$('hatGrid'), closeCloset:$('closeCloset'), startStyle:$('startStyleBtn'), startMode:$('startModeBtn'), closetMode:$('closetModeBtn'),
+  closet:$('closetShade'), closetStats:$('closetStats'), closetPreview:$('closetPreview'), previewLoadout:$('previewLoadout'), skinGrid:$('skinGrid'), glassesGrid:$('glassesGrid'), hatGrid:$('hatGrid'), closeCloset:$('closeCloset'), startStyle:$('startStyleBtn'), startMode:$('startModeBtn'), closetMode:$('closetModeBtn'), exportSave:$('exportSaveBtn'), importSave:$('importSaveBtn'), importSaveFile:$('importSaveFile'),
   logo:$('gameLogo'), startTag:$('startTag'), startTiny:$('startTiny'), closetSub:$('closetSub'), shopTitle:$('shopTitle'), shopSub:$('shopSub'), passiveTitle:$('passiveTitle'), activeTitle:$('activeTitle'),
   start:$('startScreen'), startBtn:$('startBtn'), gameOver:$('gameOver'), retry:$('retryBtn'), finalDist:$('finalDist'), finalText:$('finalText')
 };
 
-const OLD_KEY='smokeBreakCat_v1';
-const SAVE_KEY='smokeBreakCat_overdrive_v1';
-const defaults={ash:0,packs:0,best:0,smoked:0,bosses:0,runs:0,contentMode:CONTENT_MODE.ORIGINAL,up:{autoPuff:0,deepIdle:0,hotStart:0,bigDrag:0,crit:0,combo:0},meta:{lungs:0,scavenger:0,weird:0},stats:{boxesOpened:0,nearMisses:0,sprintNearMisses:0,ghostTrips:0,cosmeticFinds:0,totalDistance:0},bossWins:{vapeLord:0,hookah:0,bong:0,machine:0},cosmetics:{unlocked:['skin_street','glasses_none','hat_none'],equipped:{skin:'skin_street',glasses:'glasses_none',hat:'hat_none'}},muted:false};
-function merge(base,src){ return {...base,...src}; }
-function loadSave(){
-  try{
-    const fresh=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
-    const old=JSON.parse(localStorage.getItem(OLD_KEY)||'null');
-    const raw=fresh||old||{};
-    return { ...defaults, ...raw, contentMode:normalizeContentMode(raw.contentMode), up:{...defaults.up,...(raw.up||{})}, meta:{...defaults.meta,...(raw.meta||{})}, stats:{...defaults.stats,...(raw.stats||{})}, bossWins:{...defaults.bossWins,...(raw.bossWins||{})}, cosmetics:{...defaults.cosmetics,...(raw.cosmetics||{}), unlocked:Array.from(new Set([...(defaults.cosmetics.unlocked),...((raw.cosmetics&&raw.cosmetics.unlocked)||[])])), equipped:{...defaults.cosmetics.equipped,...((raw.cosmetics&&raw.cosmetics.equipped)||{})}} };
-  }catch(e){ return JSON.parse(JSON.stringify(defaults)); }
+let saveStorage=null;try{saveStorage=localStorage;}catch(error){}
+const loadedSave=loadStoredSave(saveStorage);let save=loadedSave.save,saveStorageHealthy=true;
+function saveNow(){
+  const ok=writeStoredSave(saveStorage,save);document.documentElement.dataset.saveStatus=ok?'ok':'session-only';
+  if(!ok&&saveStorageHealthy)setTimeout(()=>toast('SAVE STORAGE BLOCKED · SESSION ONLY'),0);saveStorageHealthy=ok;return ok;
 }
-let save=loadSave();
-function saveNow(){ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }
+if(loadedSave.needsWrite)saveNow();
 function isCandyMode(){ return save.contentMode===CONTENT_MODE.CANDY; }
 function ashLabel(){ return isCandyMode()?'SPRINKLES':'ASH'; }
 
@@ -1129,6 +1136,18 @@ function sfx(kind){ if(!audio||save.muted)return; const n=audio.ctx.currentTime+
 
 function openCloset(){ if(game.state==='run'||game.state==='smoke')game.paused=true; setSprint(false); stopPuffHold(); wardrobePreview={...save.cosmetics.equipped}; checkCosmeticUnlocks(); renderWardrobe(); ui.closet.style.display='block'; sfx('equip'); }
 function closeCloset(){ ui.closet.style.display='none'; if(game.state==='run'||game.state==='smoke')game.paused=false; }
+function downloadSaveBackup(){
+  const blob=new Blob([serializeSaveBackup(save)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download=`smoke-break-cat-save-v${SAVE_VERSION}-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),0);toast('SAVE BACKUP DOWNLOADED');sfx('pickup');
+}
+async function restoreSaveBackup(){
+  const file=ui.importSaveFile.files?.[0];ui.importSaveFile.value='';if(!file)return;
+  try{
+    const restored=parseSaveBackup(await file.text());save=restored;wardrobePreview={...save.cosmetics.equipped};const persisted=saveNow();
+    if(audio)audio.master.gain.setTargetAtTime(save.muted?0:.62,audio.ctx.currentTime,.02);ui.mute.textContent=save.muted?'×':'♫';syncContentModeUI();checkCosmeticUnlocks();renderWardrobe();updateHud();
+    toast(persisted?'SAVE BACKUP RESTORED':'RESTORED FOR SESSION · STORAGE BLOCKED');sfx('unlock');
+  }catch(error){toast('BACKUP REJECTED · INVALID SAVE');sfx('deny');}
+}
 function openShop(){ if(game.state==='title'||game.state==='dead')return; game.paused=true; setSprint(false); stopPuffHold(); refreshShop(); ui.modal.style.display='block'; sfx('buy'); }
 function closeShop(){ ui.modal.style.display='none'; game.paused=false; }
 function toggleMute(){ initAudio(); save.muted=!save.muted; if(audio) audio.master.gain.setTargetAtTime(save.muted?0:.62,audio.ctx.currentTime,.02); ui.mute.textContent=save.muted?'×':'♫'; saveNow(); }
@@ -1136,7 +1155,7 @@ function startGame(){ initAudio(); if(audio && audio.ctx.state==='suspended') au
 function retryGame(){ initAudio(); if(audio && audio.ctx.state==='suspended') audio.ctx.resume(); resetRun(); }
 function gameplayAction(){ if(game.paused)return; if(game.state==='run')jump(); else if(game.state==='smoke')puff(true); }
 
-bindTap(ui.upgrades,openShop); bindTap(ui.style,openCloset); bindTap(ui.startStyle,openCloset); bindTap(ui.startMode,toggleContentPresentation); bindTap(ui.closetMode,toggleContentPresentation); bindTap(ui.closeCloset,closeCloset); bindTap(ui.closeShop,closeShop); ui.mute.textContent=save.muted?'×':'♫'; bindTap(ui.mute,toggleMute); bindTap(ui.start,startGame); bindTap(ui.retry,retryGame); bindTap(ui.jump,jump); bindTap(canvas,gameplayAction,{stop:false});
+bindTap(ui.upgrades,openShop); bindTap(ui.style,openCloset); bindTap(ui.startStyle,openCloset); bindTap(ui.startMode,toggleContentPresentation); bindTap(ui.closetMode,toggleContentPresentation); bindTap(ui.exportSave,downloadSaveBackup); bindTap(ui.importSave,()=>ui.importSaveFile.click()); ui.importSaveFile.addEventListener('change',restoreSaveBackup); bindTap(ui.closeCloset,closeCloset); bindTap(ui.closeShop,closeShop); ui.mute.textContent=save.muted?'×':'♫'; bindTap(ui.mute,toggleMute); bindTap(ui.start,startGame); bindTap(ui.retry,retryGame); bindTap(ui.jump,jump); bindTap(canvas,gameplayAction,{stop:false});
 function sprintDown(e){ prepInputEvent(e,true); setSprint(true); }
 function sprintUp(e){ if(e) prepInputEvent(e,true); setSprint(false); }
 ui.sprint.addEventListener('touchstart',sprintDown,{passive:false}); ui.sprint.addEventListener('pointerdown',sprintDown,{passive:false}); ui.sprint.addEventListener('mousedown',sprintDown,false);

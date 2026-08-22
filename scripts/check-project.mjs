@@ -20,6 +20,12 @@ requireMatch(/cosmetics-glasses-v1\.png/, 'runtime must load the production eyew
 requireMatch(/cosmetics-hats-v1\.png/, 'runtime must load the production hat atlas');
 requireMatch(/smokeables-original-v1\.png/, 'runtime must load the Original-mode smokeable atlas');
 requireMatch(/smokeables-candy-v1\.png/, 'runtime must load the Candy-mode smokeable atlas');
+requireMatch(/state\/save-schema\.js/, 'runtime must load the versioned save schema module');
+requireMatch(/loadStoredSave\(saveStorage\)/, 'runtime must load progress through the migration adapter');
+requireMatch(/writeStoredSave\(saveStorage,save\)/, 'runtime must persist progress through the guarded storage adapter');
+requireMatch(/id="exportSaveBtn"/, 'wardrobe must expose save backup download');
+requireMatch(/id="importSaveBtn"/, 'wardrobe must expose save backup restore');
+requireMatch(/parseSaveBackup/, 'backup restore must use validated save parsing');
 requireMatch(/drawSmokeableAtlas\(v,ratio,held\)/, 'runtime must render production encounter devices through the atlas path');
 requireMatch(/\.26\+\.74\*ratio/, 'atlas sticks must preserve burn-down state toward the mouth socket');
 requireMatch(/id:'skin_skeleton'/, 'Bone Cat must use the real skin_skeleton renderer key');
@@ -33,6 +39,7 @@ requireMatch(/drawGlasses\(glasses,eyeLocal\[0\],eyeLocal\[1\],t\)/, 'eyewear mu
 requireMatch(/drawHat\(hat,eyeLocal\[0\]-6,eyeLocal\[1\]-23,t\)/, 'hats must render inside the pose-local transform');
 if (/skin_bone:/.test(html)) failures.push('obsolete skin_bone renderer key must not return');
 if (/function catSpriteFilter\(/.test(html)) failures.push('whole-image cosmetic filters must not return');
+if (/localStorage\.setItem/.test(html)) failures.push('runtime must not bypass the guarded save adapter');
 for (const style of ['shades','round','heart','pit','cyber','star','goggles','monocle','threeD','lightning','laser']) {
   requireMatch(new RegExp(`${style}:\\{frame:`), `missing production eyewear mapping for ${style}`);
 }

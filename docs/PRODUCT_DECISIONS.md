@@ -9,6 +9,7 @@
 | Creative identity | Preserve the tobacco-themed original | Mobile-store acceptance is not an initial launch requirement. |
 | Portability | Keep simulation, input actions, content, saves, and rendering boundaries separable | A later Capacitor wrapper or native-engine port does not require redesigning game rules. |
 | Alternate presentation | Add Little Baby Idiot Mode | Players may swap tobacco presentation for a candy content skin without changing mechanics. |
+| Save durability | Versioned local schema plus portable JSON backup | Existing browser progress migrates in place, corrupted current data may recover from the legacy key, and players can keep a copy outside browser storage. |
 
 ## Distribution policy position
 
