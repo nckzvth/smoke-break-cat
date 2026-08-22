@@ -18,6 +18,10 @@ requireMatch(/hazards-ground-v1\.png/, 'runtime must load the ground-hazard atla
 requireMatch(/hazards-flying-v1\.png/, 'runtime must load the flying-hazard atlas');
 requireMatch(/cosmetics-glasses-v1\.png/, 'runtime must load the production eyewear atlas');
 requireMatch(/cosmetics-hats-v1\.png/, 'runtime must load the production hat atlas');
+requireMatch(/smokeables-original-v1\.png/, 'runtime must load the Original-mode smokeable atlas');
+requireMatch(/smokeables-candy-v1\.png/, 'runtime must load the Candy-mode smokeable atlas');
+requireMatch(/drawSmokeableAtlas\(v,ratio,held\)/, 'runtime must render production encounter devices through the atlas path');
+requireMatch(/\.26\+\.74\*ratio/, 'atlas sticks must preserve burn-down state toward the mouth socket');
 requireMatch(/skin_skeleton:'grayscale/, 'Bone Cat must use the real skin_skeleton renderer key');
 requireMatch(/drawGlasses\(glasses,eyeLocal\[0\],eyeLocal\[1\],t\)/, 'eyewear must render inside the pose-local transform');
 requireMatch(/drawHat\(hat,eyeLocal\[0\]-6,eyeLocal\[1\]-23,t\)/, 'hats must render inside the pose-local transform');
@@ -27,6 +31,9 @@ for (const style of ['shades','round','heart','pit','cyber','star','goggles','mo
 }
 for (const style of ['beanie','trucker','cowboy','wizard','crown','bucket','devil','propeller','halo','chef','cone']) {
   requireMatch(new RegExp(`${style}:\\{frame:`), `missing production hat mapping for ${style}`);
+}
+for (const visual of ['cigarette','menthol','nurse','gold','ghost','cigar','vape','vapeLord','hookah','bong','machine','candyStick','mintCandy','wafer','honeycomb','sourBelt','chocolate','juiceBox','sodaJerk','sundae','gumball','candyCrusher']) {
+  requireMatch(new RegExp(`${visual}:\\{frame:`), `missing production encounter-device mapping for ${visual}`);
 }
 if (/street-cat-run-v1\.png/.test(html)) failures.push('runtime must not fall back to the superseded binary gallop pose');
 
@@ -68,10 +75,15 @@ const cosmeticAssets = [
   {name:'eyewear cosmetics',file:'cosmetics-glasses-v1.png',width:1152,height:768,budget:400_000},
   {name:'hat cosmetics',file:'cosmetics-hats-v1.png',width:1152,height:768,budget:650_000},
 ];
+const smokeableAssets = [
+  {name:'Original-mode smokeables',file:'smokeables-original-v1.png',width:1152,height:768,budget:600_000},
+  {name:'Candy-mode smokeables',file:'smokeables-candy-v1.png',width:1152,height:768,budget:650_000},
+];
 const productionAssets = [
   ...characterAssets.map((asset)=>({...asset,directory:'characters'})),
   ...hazardAssets.map((asset)=>({...asset,directory:''})),
   ...cosmeticAssets.map((asset)=>({...asset,directory:''})),
+  ...smokeableAssets.map((asset)=>({...asset,directory:''})),
 ];
 for (const asset of productionAssets) {
   const path = new URL(`../public/assets/${asset.directory?`${asset.directory}/`:''}${asset.file}`, import.meta.url);
@@ -95,4 +107,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Project checks passed: ${ids.length} unique ids, ${scriptBlocks.length} valid inline script, ${characterAssets.length} character assets, ${hazardAssets.length} hazard atlases, and ${cosmeticAssets.length} cosmetic atlases.`);
+console.log(`Project checks passed: ${ids.length} unique ids, ${scriptBlocks.length} valid inline script, ${characterAssets.length} character assets, ${hazardAssets.length} hazard atlases, ${cosmeticAssets.length} cosmetic atlases, and ${smokeableAssets.length} encounter atlases.`);

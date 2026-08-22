@@ -53,6 +53,8 @@ This board is a concept anchor, not a sprite atlas. Runtime poses are generated 
 | `public/assets/hazards-flying-v1.png` | OpenAI built-in image generation; deterministic alpha extraction; measured crop metadata; optimized project copy | Shipped 3×2 two-frame aerial-hazard atlas | `5f6684c1f61253bd337668c379140475c066dac7f573bd398112130e206e190f` |
 | `public/assets/cosmetics-glasses-v1.png` | OpenAI built-in image generation; targeted cloth-removal edit; deterministic checkerboard-to-alpha cleanup; measured crop metadata | Shipped 4×3 atlas containing 11 eyewear cosmetics and one empty cell | `9691cc5eb957cde2601538cfd3cc57a0deed0a830929ebbc00c4f72d881a83f2` |
 | `public/assets/cosmetics-hats-v1.png` | OpenAI built-in image generation; deterministic color-mask expansion preserving dark outlines; measured crop metadata | Shipped 4×3 atlas containing 11 hat cosmetics and one empty cell | `a824a378122ae2d29aacff0c380915ec5109654ea3db82c582ca2c91032696a9` |
+| `public/assets/smokeables-original-v1.png` | OpenAI built-in image generation; deterministic checkerboard-to-alpha cleanup; per-cell resize and measured crop metadata | Shipped 4×3 atlas containing all 11 Original-mode encounter props and one empty cell | `9cbe85fcab403f3c988717ddac7db1d8f94f8fc0d2045e368cd0201e1a22a67a` |
+| `public/assets/smokeables-candy-v1.png` | OpenAI built-in image generation; deterministic checkerboard-to-alpha cleanup; per-cell resize and measured crop metadata | Shipped 4×3 atlas containing all 11 Candy-mode encounter props and one empty cell | `5ea08d048fdfe3816c04488cb5837da4adce3a6fe9edabf6c09cab8b1e6c66a1` |
 
 Final generation prompt:
 
@@ -98,6 +100,14 @@ Hat atlas:
 
 > Create exactly eleven isolated side-view hat cosmetics in a strict 4-column by 3-row grid: dockworker beanie, battered trucker cap, outlaw cowboy hat, crooked wizard hat, chipped crown, dented bucket hat, devil horns, propeller beanie, halo, street-chef toque, and traffic-cone crown. Leave the final cell empty. Match the approved heavy-ink, chipped screen-print finish; align every item for the right-facing cat; use genuine transparent alpha; include no cat parts, text, dividers, shadows, scenery, or extra objects.
 
+Original encounter-device atlas:
+
+> Create a strict 4×3 transparent atlas of right-facing side-view props: cigarette, menthol cigarette, nurse-themed cigarette, gold-filter cigarette, ghost cigarette, cigar, compact vape, boss vape mod, compact hookah with right-facing hose, compact bong with right-facing mouth tube, and boss industrial smoking machine with right-facing mouth tube; leave the final cell empty. Match the approved heavy black ink, limited warm palette, distressed screen-print texture, consistent lighting, cell padding, and phone-scale silhouette. No labels, brands, cats, hands, scenery, smoke clouds, or overlap.
+
+Candy encounter-device atlas:
+
+> Create a strict 4×3 transparent atlas of right-facing harmless candy props: striped candy stick, mint stick, heart wafer, honeycomb stick, ghost sour belt, chocolate wafer roll, juice box with right-facing straw, boss soda dispenser, sundae with right-facing spoon, gumball dispenser, and boss candy-crusher machine with right-facing candy tube; leave the final cell empty. Match the approved heavy black ink, playful limited candy palette, distressed screen-print texture, consistent lighting, cell padding, and phone-scale silhouette. No labels, brands, cats, hands, cigarettes, smoke, scenery, or overlap.
+
 The original individual poses required targeted background extraction because their first versions used baked checkerboards. The run-cycle generator also baked its checkerboard into the PNG; two constrained extraction edits still returned RGB files, so the shipped atlas uses a deterministic neutral-checkerboard-to-alpha conversion with softened antialiased edge pixels. The full-resolution generated originals remain unmodified outside the project copy.
 
 ## Runtime implementation
@@ -114,5 +124,7 @@ The original individual poses required targeted background extraction because th
 - Eyewear and hats now use separate production atlases with measured crops. They render inside the same foot-pivot transform as the active run, jump, landing, and encounter pose, so squash, rotation, and recoil cannot detach them from the cat.
 - Skin filters again receive distinct code-native markings on the generated sprite path. The Bone Cat renderer key is corrected, and the animated closet preview can display locked combinations without changing the equipped save.
 - Environmental motion now includes neon scan/flicker, breathing windows, street steam, swaying wires, a pulsing moon, type-specific ground-hazard motion, drone rotor/lights, orbiting loot sparks, and animated encounter-device embers/screens/bubbles.
+- Original and Candy encounter props now use separate production atlases with identical visual keys and shared mechanics. Every crop is anchored by its right-side mouth contact and flipped at runtime for the right-facing cat; stick crops shorten from the ember/bite end while the mouth end remains fixed.
+- Encounter staging adds a mode-aware focus wash, pulsing ground aura, concentric device rings, boss orbit chevrons, and puff-timed impact particles behind the character and HUD.
 - The city renderer now uses inked building silhouettes, brick lines, neon windows, fire escapes, cables, road cracks, moon glow, sprint streaks, and a screen vignette.
 - Hats and glasses remain separate canvas layers. Skin palette filters are provisional until dedicated color masks or layered sprites replace them.

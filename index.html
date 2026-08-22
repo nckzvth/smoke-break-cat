@@ -243,7 +243,7 @@ import { CONTENT_MODE, assertCompleteCandyRegistry, normalizeContentMode, presen
 'use strict';
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const art={cat:new Image(),catRunCycle:new Image(),catPuffCycle:new Image(),catJump:new Image(),hazardsGround:new Image(),hazardsFlying:new Image(),cosmeticsGlasses:new Image(),cosmeticsHats:new Image()};
+const art={cat:new Image(),catRunCycle:new Image(),catPuffCycle:new Image(),catJump:new Image(),hazardsGround:new Image(),hazardsFlying:new Image(),cosmeticsGlasses:new Image(),cosmeticsHats:new Image(),smokeablesOriginal:new Image(),smokeablesCandy:new Image()};
 for(const image of Object.values(art)) image.decoding='async';
 art.cat.src='./assets/characters/street-cat-base-v1.png';
 art.catRunCycle.src='./assets/characters/street-cat-run-cycle-v2.png';
@@ -253,6 +253,8 @@ art.hazardsGround.src='./assets/hazards-ground-v1.png';
 art.hazardsFlying.src='./assets/hazards-flying-v1.png';
 art.cosmeticsGlasses.src='./assets/cosmetics-glasses-v1.png';
 art.cosmeticsHats.src='./assets/cosmetics-hats-v1.png';
+art.smokeablesOriginal.src='./assets/smokeables-original-v1.png';
+art.smokeablesCandy.src='./assets/smokeables-candy-v1.png';
 const $ = id => document.getElementById(id);
 const ui = {
   dist:$('distText'), ash:$('ashText'), packs:$('packText'), hearts:$('heartText'), phase:$('phaseText'), buff:$('buffText'), smoke:$('smokeCard'), cigFill:$('cigFill'), puffReadout:$('puffReadout'), toast:$('toast'),
@@ -692,9 +694,32 @@ function drawBackground(t){
   if(game.sprintActive&&game.state==='run'){ctx.globalAlpha=.55;for(let i=0;i<8;i++){const sy=72+i*27%Math.max(90,groundY-60),len=44+(i%3)*27;ctx.fillStyle=['#ffd166','#ff5f57','#80e1c1','#b388ff'][i%4];ctx.beginPath();ctx.moveTo(W-(i*113+t*360)%W,sy);ctx.lineTo(W-(i*113+t*360)%W-len,sy+2);ctx.lineTo(W-(i*113+t*360)%W-len*.8,sy+5);ctx.closePath();ctx.fill();}ctx.globalAlpha=1;}
   const vignette=ctx.createRadialGradient(W*.5,H*.45,Math.min(W,H)*.2,W*.5,H*.45,Math.max(W,H)*.72);vignette.addColorStop(.55,'#0000');vignette.addColorStop(1,'#02030aaa');ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);
 }
-function drawSmokeableDevice(smoke,x,y,ratio=1,scale=1){
+const SMOKEABLE_ATLAS_SPRITES={
+  cigarette:{frame:0,b:[50,108,202,52],width:72,mouthY:.5,stick:true},menthol:{frame:1,b:[50,110,200,52],width:72,mouthY:.5,stick:true},nurse:{frame:2,b:[42,111,200,51],width:72,mouthY:.5,stick:true},gold:{frame:3,b:[34,113,210,52],width:74,mouthY:.5,stick:true},
+  ghost:{frame:4,b:[36,70,220,70],width:74,mouthY:.5,stick:true},cigar:{frame:5,b:[44,72,212,66],width:82,mouthY:.5,stick:true},vape:{frame:6,b:[43,47,192,120],width:70,mouthY:.43},vapeLord:{frame:7,b:[29,25,220,145],width:104,mouthY:.38,boss:true},
+  hookah:{frame:8,b:[75,0,195,198],width:96,mouthY:.61,boss:true},bong:{frame:9,b:[50,0,170,200],width:82,mouthY:.34,boss:true},machine:{frame:10,b:[14,0,246,202],width:114,mouthY:.47,boss:true},
+  candyStick:{frame:0,b:[52,108,202,52],width:72,mouthY:.5,stick:true,candy:true},mintCandy:{frame:1,b:[51,109,200,53],width:72,mouthY:.5,stick:true,candy:true},wafer:{frame:2,b:[44,111,192,51],width:72,mouthY:.5,stick:true,candy:true},honeycomb:{frame:3,b:[33,102,214,64],width:76,mouthY:.5,stick:true,candy:true},
+  sourBelt:{frame:4,b:[44,66,214,72],width:76,mouthY:.5,stick:true,candy:true},chocolate:{frame:5,b:[47,79,213,68],width:82,mouthY:.5,stick:true,candy:true},juiceBox:{frame:6,b:[24,20,206,151],width:72,mouthY:.16,candy:true},sodaJerk:{frame:7,b:[29,0,216,185],width:106,mouthY:.43,boss:true,candy:true},
+  sundae:{frame:8,b:[50,0,205,181],width:92,mouthY:.48,boss:true,candy:true},gumball:{frame:9,b:[47,0,209,181],width:92,mouthY:.66,boss:true,candy:true},candyCrusher:{frame:10,b:[14,0,256,190],width:118,mouthY:.41,boss:true,candy:true}
+};
+function drawSmokeableAtlas(v,ratio,held){
+  const spec=SMOKEABLE_ATLAS_SPRITES[v],image=spec?.candy?art.smokeablesCandy:art.smokeablesOriginal;
+  if(!spec||!imageReady(image))return null;
+  const cellW=image.naturalWidth/4,cellH=image.naturalHeight/3,[bx,by,bw,bh]=spec.b;
+  const visible=spec.stick?Math.max(.26,Math.min(1,.26+.74*ratio)):1;
+  const cropW=bw*visible,sx=(spec.frame%4)*cellW+bx+(bw-cropW),sy=Math.floor(spec.frame/4)*cellH+by;
+  const dw=spec.width*visible,dh=spec.width*bh/bw,left=held?-dw:-dw/2,top=held?-dh*spec.mouthY:-dh/2;
+  if(spec.boss||v==='ghost'||v==='sourBelt'||v==='vape'){
+    const color=spec.candy?'#ff78b5':spec.boss?'#b388ff':'#80e1c1';ctx.save();ctx.globalAlpha=spec.boss?.19:.11;ctx.fillStyle=color;ctx.shadowBlur=spec.boss?26:16;ctx.shadowColor=color;ctx.beginPath();ctx.ellipse(left+dw*.5,top+dh*.52,dw*.48,Math.max(10,dh*.4),0,0,Math.PI*2);ctx.fill();ctx.restore();
+  }
+  ctx.imageSmoothingEnabled=true;ctx.drawImage(image,sx,sy,cropW,bh,left,top,dw,dh);
+  return {left,top,width:dw,height:dh,stick:!!spec.stick,boss:!!spec.boss,candy:!!spec.candy};
+}
+function drawSmokeableDevice(smoke,x,y,ratio=1,scale=1,held=false){
   smoke=displaySmoke(smoke||SMOKES[0]); const v=smoke.visual||'cigarette'; ctx.save(); ctx.translate(x,y); ctx.scale(scale,scale);
   const glow=(color,r)=>{ctx.globalAlpha=.18;ctx.fillStyle=color;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;};
+  const atlasPlacement=drawSmokeableAtlas(v,ratio,held);
+  if(!atlasPlacement){
   if(v==='cigarette'||v==='menthol'||v==='nurse'||v==='gold'||v==='ghost'){
     const len=50*ratio+7; if(v==='ghost') glow('#b388ff',28); if(v==='menthol') glow('#80e1c1',22); ctx.rotate(-.12);
     ctx.fillStyle=v==='gold'?'#e7b14e':v==='ghost'?'#c9b7ff':'#f0e7d1'; ctx.fillRect(-len/2,-3,len,6);
@@ -731,8 +756,16 @@ function drawSmokeableDevice(smoke,x,y,ratio=1,scale=1){
     glow('#80e1c1',44);ctx.globalAlpha=.78;ctx.fillStyle='#bde8f0';ctx.beginPath();ctx.arc(0,-12,28,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;for(const [gx,gy,c] of [[-12,-20,'#ff5f57'],[6,-22,'#ffd166'],[15,-7,'#80e1c1'],[-7,1,'#b388ff'],[8,4,'#ff9bd5']]){ctx.fillStyle=c;ctx.beginPath();ctx.arc(gx,gy,7,0,Math.PI*2);ctx.fill();}ctx.fillStyle='#c63d49';ctx.fillRect(-24,14,48,22);ctx.fillStyle='#ffd166';ctx.fillRect(-8,20,16,8);ctx.fillStyle='#7c3038';ctx.fillRect(-14,36,28,13);
   } else if(v==='candyCrusher'){
     glow('#ff9bd5',48);ctx.fillStyle='#342f49';ctx.fillRect(-31,-35,62,66);ctx.fillStyle='#f7f0dc';ctx.fillRect(-25,-29,50,44);ctx.fillStyle='#80e1c1';ctx.fillRect(-20,-24,40,9);ctx.fillStyle='#ff9bd5';ctx.fillRect(-20,-11,40,9);ctx.fillStyle='#ffd166';ctx.fillRect(-20,2,40,9);ctx.fillStyle='#11131d';ctx.fillRect(5,19,19,7);ctx.strokeStyle='#aab1bd';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-20,31);ctx.lineTo(-28,43);ctx.moveTo(20,31);ctx.lineTo(28,43);ctx.stroke();ctx.fillStyle='#ff5f57';ctx.beginPath();ctx.arc(21,-26,5,0,Math.PI*2);ctx.fill();
-  }
+  }}
   const anim=game.runTime,pulse=.5+.5*Math.sin(anim*8);
+  if(atlasPlacement){
+    const a=atlasPlacement,cx=a.left+a.width*.5,cy=a.top+a.height*.5;
+    if(a.stick){ctx.save();ctx.globalAlpha=.38+.5*pulse;ctx.fillStyle=a.candy?'#ffd166':'#ff714d';ctx.shadowBlur=6+pulse*7;ctx.shadowColor=ctx.fillStyle;ctx.beginPath();ctx.arc(a.left,cy,2.2+pulse*1.5,0,Math.PI*2);ctx.fill();ctx.restore();}
+    else if(v==='vape'||v==='vapeLord'||v==='sodaJerk'){ctx.save();ctx.globalAlpha=.25+.25*pulse;ctx.strokeStyle=a.candy?'#ff9bd5':'#80e1c1';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx-a.width*.18,cy-a.height*.13);ctx.lineTo(cx+a.width*.18,cy-a.height*.13);ctx.stroke();ctx.restore();}
+    else if(v==='hookah'||v==='bong'||v==='sundae'||v==='gumball'){ctx.save();ctx.globalAlpha=.28;ctx.strokeStyle=a.candy?'#ffd166':'#d8fbff';ctx.lineWidth=1.2;for(let i=0;i<3;i++){const by=a.top+a.height*.4-((anim*13+i*8)%22),bx=cx+Math.sin(anim*3+i)*7;ctx.beginPath();ctx.arc(bx,by,1.5+i*.35,0,Math.PI*2);ctx.stroke();}ctx.restore();}
+    else if(v==='machine'||v==='candyCrusher'){ctx.save();for(let i=0;i<3;i++){ctx.fillStyle=['#ff5f57','#ffd166','#80e1c1'][(i+Math.floor(anim*7))%3];ctx.globalAlpha=.28+.45*(i===Math.floor(anim*7)%3);ctx.fillRect(cx-a.width*.18+i*a.width*.14,cy-a.height*.18,4,4);}ctx.restore();}
+    ctx.restore();return;
+  }
   if(['cigarette','menthol','nurse','gold','ghost','cigar','candyStick','mintCandy','wafer','honeycomb','sourBelt','chocolate'].includes(v)){const base=['cigar','chocolate'].includes(v)?58*ratio+10:50*ratio+7;ctx.globalAlpha=.25+.45*pulse;ctx.fillStyle=isCandyMode()?'#ffd166':'#ff714d';ctx.shadowBlur=5+pulse*5;ctx.shadowColor=ctx.fillStyle;ctx.beginPath();ctx.arc(-base/2,0,2.5+pulse,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;}
   else if(v==='vape'||v==='vapeLord'){ctx.globalAlpha=.3+.35*pulse;ctx.fillStyle='#f7f0dc';ctx.fillRect(v==='vape'?-5:-10,(v==='vape'?-17:-24)+pulse*21,v==='vape'?10:20,2);ctx.globalAlpha=1;}
   else if(v==='hookah'||v==='bong'){ctx.strokeStyle='#d8fbff';ctx.lineWidth=1.2;ctx.globalAlpha=.35;for(let i=0;i<3;i++){const by=18-((anim*16+i*9)%24),bx=Math.sin(anim*3+i)*7;ctx.beginPath();ctx.arc(bx,by,1.5+i*.35,0,Math.PI*2);ctx.stroke();}ctx.globalAlpha=1;}
@@ -746,14 +779,16 @@ function drawSmokeHeld(smoke,x,y,ratio){
   smoke=displaySmoke(smoke); const visual=smoke?.visual||'cigarette'; const scale=['vapeLord','hookah','bong','machine','sodaJerk','sundae','gumball','candyCrusher'].includes(visual)?.43:['vape','juiceBox'].includes(visual)?.55:.62;
   const sticks=['cigarette','menthol','nurse','gold','ghost','cigar','candyStick','mintCandy','wafer','honeycomb','sourBelt','chocolate'];
   if(sticks.includes(visual)){
-    const baseLen=['cigar','chocolate'].includes(visual)?58*ratio+10:50*ratio+7;
-    ctx.save();ctx.translate(x,y);ctx.scale(-1,1);drawSmokeableDevice(smoke,-baseLen*scale*.5,0,ratio,scale);ctx.restore();
+    ctx.save();ctx.translate(x,y);ctx.scale(-1,1);
+    if(imageReady(SMOKEABLE_ATLAS_SPRITES[visual].candy?art.smokeablesCandy:art.smokeablesOriginal))drawSmokeableDevice(smoke,0,0,ratio,scale,true);
+    else {const baseLen=['cigar','chocolate'].includes(visual)?58*ratio+10:50*ratio+7;drawSmokeableDevice(smoke,-baseLen*scale*.5,0,ratio,scale);}
+    ctx.restore();
     return;
   }
-  const sockets={
-    vape:[0,31],vapeLord:[0,43],hookah:[-32,-32],bong:[0,46],machine:[0,50],
-    juiceBox:[-15,39],sodaJerk:[-18,48],sundae:[-24,6],gumball:[-28,12],candyCrusher:[-31,0]
-  };
+  if(SMOKEABLE_ATLAS_SPRITES[visual]&&imageReady(SMOKEABLE_ATLAS_SPRITES[visual].candy?art.smokeablesCandy:art.smokeablesOriginal)){
+    ctx.save();ctx.translate(x,y);ctx.scale(-1,1);drawSmokeableDevice(smoke,0,0,ratio,scale,true);ctx.restore();return;
+  }
+  const sockets={vape:[0,31],vapeLord:[0,43],hookah:[-32,-32],bong:[0,46],machine:[0,50],juiceBox:[-15,39],sodaJerk:[-18,48],sundae:[-24,6],gumball:[-28,12],candyCrusher:[-31,0]};
   const [ox,oy]=sockets[visual]||[0,0];
   drawSmokeableDevice(smoke,x+ox*scale,y+oy*scale,ratio,scale);
 }
@@ -1019,7 +1054,11 @@ function drawGroundSmoke(smoke,x,y){
 }
 function drawEncounter(t){
   const smoke=displaySmoke(game.smokeable||SMOKES[0]), mouth=catMouthSocket();
-  ctx.save();ctx.globalAlpha=.11+.025*Math.sin(t*7);ctx.fillStyle=smoke.boss?'#b388ff':'#ffd166';ctx.beginPath();ctx.arc(mouth.x+14,mouth.y,smoke.boss?38:27,0,Math.PI*2);ctx.fill();ctx.restore();
+  const accent=isCandyMode()?'#ff78b5':smoke.boss?'#b388ff':'#ffd166',beat=.5+.5*Math.sin(t*(smoke.boss?4.2:6.4));
+  ctx.save();const focus=ctx.createRadialGradient(cat.x+18,cat.y-25,20,cat.x+18,cat.y-25,Math.min(W,H)*.58);focus.addColorStop(0,smoke.boss?'#b388ff22':'#ffd16618');focus.addColorStop(.45,'#080a1608');focus.addColorStop(1,'#02030a88');ctx.fillStyle=focus;ctx.fillRect(0,0,W,H);ctx.restore();
+  ctx.save();ctx.globalAlpha=.09+.045*beat;ctx.strokeStyle=accent;ctx.lineWidth=2;for(let i=0;i<(smoke.boss?3:2);i++){ctx.beginPath();ctx.arc(mouth.x+14,mouth.y,24+i*13+beat*5,0,Math.PI*2);ctx.stroke();}ctx.globalAlpha=.18;ctx.fillStyle=accent;ctx.beginPath();ctx.ellipse(cat.x+15,groundY+4,smoke.boss?70:55,8+beat*2,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  if(smoke.boss){ctx.save();ctx.translate(mouth.x+14,mouth.y);ctx.rotate(t*.7);ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.globalAlpha=.26;for(let i=0;i<4;i++){ctx.rotate(Math.PI/2);ctx.beginPath();ctx.moveTo(44,0);ctx.lineTo(51,0);ctx.lineTo(47,-4);ctx.moveTo(51,0);ctx.lineTo(47,4);ctx.stroke();}ctx.restore();}
+  if(cat.puffTime>0){const p=Math.min(1,Math.max(0,(.34-cat.puffTime)/.34)),impact=Math.sin(p*Math.PI);ctx.save();ctx.translate(mouth.x+5,mouth.y);ctx.globalAlpha=.7*impact;ctx.strokeStyle=accent;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,7+p*35,0,Math.PI*2);ctx.stroke();for(let i=0;i<6;i++){const a=i*Math.PI/3+t*.2,r=11+p*25;ctx.fillStyle=i%2?accent:'#f7f0dc';ctx.save();ctx.rotate(a);ctx.translate(r,0);ctx.rotate(Math.PI/4);ctx.fillRect(-2,-2,4,4);ctx.restore();}ctx.restore();}
   if(H>=420){ ctx.fillStyle='#f7f0dc';ctx.font='700 11px ui-monospace,monospace';ctx.textAlign='center';ctx.fillText(smoke.boss?`${isCandyMode()?'BOSS TREAT':'BOSS DEVICE'} · PHASE ${game.bossPhase+1}`:(isCandyMode()?'STREET TREAT':'SMOKEABLE'),mouth.x+15,mouth.y-55);ctx.textAlign='left'; }
 }
 function render(tms){
