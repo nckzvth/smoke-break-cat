@@ -6,7 +6,7 @@ The current public goal is fast playtesting through GitHub Pages while keeping t
 
 ## Project status
 
-**Alpha / active production hardening.** The original single-file prototype is preserved in `smoke_break_cat_history_update.html`. Production work is tracked in [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).
+**Public alpha / active production hardening.** Play the current build at **https://nckzvth.github.io/smoke-break-cat/**. The original single-file prototype is preserved in `smoke_break_cat_history_update.html`. Production work is tracked in [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).
 
 ## Product direction
 
@@ -22,13 +22,28 @@ The alternate content mode is a presentation feature, not a claim of compliance 
 
 ## Local development
 
-The production toolchain is being added in the first hardening milestone. Until then, the prototype can be served with any static HTTP server.
+Requires Node.js 24 or another Vite-compatible Node release.
+
+```sh
+npm install
+npm run dev
+```
+
+Before publishing changes:
+
+```sh
+npm test
+npm run build
+```
+
+Pull requests run the same validation in GitHub Actions. Merges to `main` deploy the validated `dist/` artifact to GitHub Pages.
 
 ## Documentation
 
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Product and distribution decisions](docs/PRODUCT_DECISIONS.md)
 - [Content-mode contract](docs/CONTENT_MODES.md)
+- [Current production status](docs/STATUS.md)
 
 ## License
 

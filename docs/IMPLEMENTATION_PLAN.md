@@ -4,6 +4,14 @@
 
 Turn the playable prototype into a reliable public web alpha on GitHub Pages, then evolve it into a studio-grade codebase without sacrificing the game's tone or making a future mobile port unnecessarily expensive.
 
+## Current status
+
+- Milestone 0 is complete.
+- The first Milestone 1 foundation is deployed at `https://nckzvth.github.io/smoke-break-cat/`.
+- Build, validation, continuous integration, and Pages deployment workflows are installed.
+- The confirmed compact-layout and mid-encounter rotation blockers are repaired in the production entry point.
+- Full modularization, content-mode implementation, automated gameplay coverage, accessibility work, and visual production remain active roadmap items.
+
 ## Non-negotiable launch gates
 
 - The repository root builds and serves a valid `index.html`.
