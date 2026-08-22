@@ -22,13 +22,14 @@ The cat is ugly-cute by design. Awkwardness is allowed when it makes the express
 - Use imperfect near-black ink, warm paper, simple filled shapes, offset shadows, and a restrained screen-print palette.
 - Preserve one shared mascot renderer across title, gameplay, encounters, and wardrobe preview.
 - Skins change the same body through color, patches, stripes, bones, or glow; they never replace the cat's face or silhouette.
-- Equippables anchor inside the cat's local head transform and remain readable at phone scale.
+- Equippables anchor inside the cat's local head transform and remain readable at phone scale. Eyewear uses a smaller far lens and larger near lens to follow the three-quarter face; hats span the actual skull width and either preserve or deliberately replace the ear silhouette.
 - Animate shape transforms, limbs, tails, brows, glow, and accessory parts directly in canvas.
 - Use authored idle, run, airborne, and puff poses. A pose must change limb placement and weight, not merely rotate the whole mascot.
 - Keep the body upright and chibi. Literal neck, throat, quadruped spine, feline ribcage, haunch, and panther anatomy are rejected.
 - During a smoke pose, the lifted near arm replaces its normal run/idle arm. The cat must always have exactly two arms and two legs.
-- The run uses six authored biped keys: opposing contact, compression, passing, and flight. Smooth interpolation connects strong silhouettes; it must not disguise weak poses. Far limbs recede but remain readable.
+- The run uses six authored biped keys: opposing contact, compression, passing, and flight. Arms are contralateral—each arm opposes its same-side leg and the two hands never pump in the same direction. Smooth interpolation connects strong silhouettes; it must not disguise weak poses. Far limbs recede but remain readable.
 - Every wardrobe card must show a code-drawn thumbnail so the visual reward is legible before it is unlocked or equipped.
+- A hover/focus preview always starts from the equipped loadout, swaps only the focused category, and resets on exit. Previewing several cards must never accumulate a phantom mixed loadout.
 - Original and Little Baby Idiot props share timing, sockets, scale, and gameplay rules.
 - Do not ship generated character, cosmetic, hazard, loot, or encounter-device raster atlases.
 

@@ -35,6 +35,8 @@ requireMatch(/drawTitleMascot\(/, 'title must use the shared code-drawn mascot')
 requireMatch(/drawWardrobeMascot\(/, 'wardrobe must use the shared code-drawn mascot');
 requireMatch(/drawCosmeticThumbnail\(/, 'wardrobe cards must sell cosmetics with code-drawn thumbnails');
 requireMatch(/className='cosThumb'/, 'wardrobe must render visual cosmetic cards');
+requireMatch(/function selectWardrobePreview\(item\)\{ wardrobePreview=\{\.\.\.save\.cosmetics\.equipped\}/, 'cosmetic previews must branch from the equipped loadout instead of accumulating hover drift');
+requireMatch(/pointerleave',resetWardrobePreview/, 'cosmetic hover previews must reset to the equipped loadout');
 if (!/export const CAT_RUN_KEY_COUNT=RUN_POSES\.length/.test(codeArt)) failures.push('shared mascot must expose its six-key run-cycle contract');
 if (!codeArt.startsWith('// GREMLIN ZINE renderer:')) failures.push('the rejected transitional mascot renderer must not return');
 if (!/GREMLIN ZINE: raw screen-print UI/.test(html)) failures.push('the game shell must retain the approved punk-editorial vector language');

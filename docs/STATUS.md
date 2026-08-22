@@ -29,8 +29,11 @@ Last updated: 2026-08-22 (America/New_York)
 - Rebuilt all twelve skins as pattern/color treatments of the same mascot and all twenty-two equippables as bold code-drawn head-local layers.
 - Kept the mascot compact at gameplay scale while giving title and wardrobe enough size to judge its unobscured base face and equipped layers.
 - Added code-drawn thumbnails to all thirty-six wardrobe cards so skins and equippables advertise their actual in-game appearance before purchase or equip.
+- Re-fitted all twenty-two glasses and hats to the approved angled biped head with perspective-scaled lenses, skull-width hat bands, ear-aware silhouettes, and stable head-local animation anchors.
+- Fixed wardrobe hover/focus previews so each card branches from the real equipped loadout and resets on exit instead of accumulating unrelated skin, glasses, and hat previews.
 - Corrected the face from camera-facing/long-snouted anatomy into a short round three-quarter muzzle with a dominant near eye, smaller far eye, two top-contour ears, and no neck folds or side-ear growth.
 - Rebuilt the rejected quadruped from the owner's supplied Cat Quest proportion references as an original bipedal street cat with a cropped bomber, dark pants, mint sneakers, a low waist-level tail, and six smoothly connected authored run keys.
+- Re-authored the run as a true contralateral gait and added a regression test proving both arms oppose one another and each same-side leg at all six authored keys.
 - Rejected that transitional renderer and replaced the entire presentation with Gremlin Zine: asymmetric organic face shapes, six authored whole-pose run keys, imperfect screen-print character/cosmetic forms, raw paper-and-ink UI, offset red shadows, muted district palettes, halftone grain, and pasted street bills.
 - Rejected the later realistic-profile experiment after browser review; removed its neck bridge/folds, side-ear construction, and quadruped body in favor of a compact Cat Quest-level biped abstraction with an original urban identity.
 - Fixed the smoke pose to replace the normal near-arm swing with one bent raised arm, preserving exactly two arms and placing every Original/Candy prop on the mouth socket.
@@ -64,6 +67,7 @@ Last updated: 2026-08-22 (America/New_York)
 - 390×844 upright urban-chibi title and cigarette encounter, including short three-quarter muzzle, bomber/sneaker silhouette, waist-level tail, bent smoke arm, and mouth attachment
 - 390×844 normal-URL run and airborne states with the shared code-native Tuxedo mascot and no playtest controls
 - 390×844 animated wardrobe preview with the code-native Hell Tiger, Laser Visor, and Traffic Cone King stress loadout
+- 390×844 equipped Hell Tiger, Laser Visor, and cat-eared Dockworker Beanie smoke pose with stable head and mouth sockets
 - 1280×720 active run with no browser warnings or errors
 - 568×320 Original cigarette/cigar and Candy juice-box mouth attachment with no duplicate pedestal prop or browser errors
 - 568×320 Original cigarette/vape action phases, repeated 115 ms puff stress test, idle recovery, and inked curl trails
