@@ -80,6 +80,6 @@ The original individual poses required targeted background extraction because th
 - The title screen now presents the actual character art.
 - Ground movement advances through six authored frames at a speed-limited 10–13 fps. Each frame uses a measured paw baseline and horizontal compensation so the body changes pose without skating on the road.
 - Jumping stages compression and extension frames before the dedicated airborne pose, rotates subtly with vertical velocity, and returns through a timed landing recoil with a small dust burst.
-- Encounters use the neutral pose with a separate Original/Candy prop layer.
+- Encounters use the neutral pose with a single separate Original/Candy prop layer attached to a measured mouth socket. Stick props flip toward the facing direction; devices use per-visual mouthpiece, hose, straw, or serving-edge sockets. The former duplicate pedestal prop is not rendered during encounters.
 - The city renderer now uses inked building silhouettes, brick lines, neon windows, fire escapes, cables, road cracks, moon glow, sprint streaks, and a screen vignette.
 - Hats and glasses remain separate canvas layers. Skin palette filters are provisional until dedicated color masks or layered sprites replace them.
