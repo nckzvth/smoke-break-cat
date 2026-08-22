@@ -13,7 +13,7 @@ Turn the playable prototype into a reliable public web alpha on GitHub Pages, th
 - The first extracted module now owns the tested two-mode presentation registry, and Little Baby Idiot Mode covers every current encounter.
 - A generated character/VFX direction board defines the target silhouette, palette, layering, and effects language; identity-locked character cycles plus production hazard, loot, eyewear, hat, and paired Original/Candy encounter-device atlases now implement that direction in the runtime.
 - Full modularization, broader automated gameplay coverage, accessibility work, and visual production remain active roadmap items.
-- The visual-overhaul slice now covers the hero, run/action animation, hazards, loot, cosmetics, environment motion, encounter staging, and every encounter prop; dedicated per-pose skin masks are the remaining major sprite-pipeline gap.
+- The visual-overhaul slice now covers the hero, run/action animation, pose-aware skin recoloring, hazards, loot, cosmetics, environment motion, encounter staging, and every encounter prop. Save/progression extraction and broader visual regression coverage are the next major production gaps.
 
 ## Non-negotiable launch gates
 

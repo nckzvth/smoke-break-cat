@@ -22,10 +22,17 @@ requireMatch(/smokeables-original-v1\.png/, 'runtime must load the Original-mode
 requireMatch(/smokeables-candy-v1\.png/, 'runtime must load the Candy-mode smokeable atlas');
 requireMatch(/drawSmokeableAtlas\(v,ratio,held\)/, 'runtime must render production encounter devices through the atlas path');
 requireMatch(/\.26\+\.74\*ratio/, 'atlas sticks must preserve burn-down state toward the mouth socket');
-requireMatch(/skin_skeleton:'grayscale/, 'Bone Cat must use the real skin_skeleton renderer key');
+requireMatch(/id:'skin_skeleton'/, 'Bone Cat must use the real skin_skeleton renderer key');
+requireMatch(/function cachedSkinFrame\(/, 'generated character skins must use cached pose-aware palette frames');
+requireMatch(/skin-palette\.js/, 'pose-aware skin classification must live in the tested rendering module');
+requireMatch(/skinFrameCache\.size>=160/, 'pose-aware skin cache must remain bounded for mobile memory safety');
+requireMatch(/drawRunCycleFrame\(frame,skin\)/, 'run-cycle recoloring must receive the active skin');
+requireMatch(/drawPuffCycleFrame\(puffFrame,skin\)/, 'encounter-action recoloring must receive the active skin');
+requireMatch(/drawSkinnedSprite\(p,art\.cat,skin/, 'wardrobe preview must use the pose-aware skin pipeline');
 requireMatch(/drawGlasses\(glasses,eyeLocal\[0\],eyeLocal\[1\],t\)/, 'eyewear must render inside the pose-local transform');
 requireMatch(/drawHat\(hat,eyeLocal\[0\]-6,eyeLocal\[1\]-23,t\)/, 'hats must render inside the pose-local transform');
 if (/skin_bone:/.test(html)) failures.push('obsolete skin_bone renderer key must not return');
+if (/function catSpriteFilter\(/.test(html)) failures.push('whole-image cosmetic filters must not return');
 for (const style of ['shades','round','heart','pit','cyber','star','goggles','monocle','threeD','lightning','laser']) {
   requireMatch(new RegExp(`${style}:\\{frame:`), `missing production eyewear mapping for ${style}`);
 }
