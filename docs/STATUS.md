@@ -22,7 +22,10 @@ Last updated: 2026-08-21 (America/New_York)
 - Added complete candy presentations and code-native props for all 11 street and boss encounters.
 - Added unit coverage that enforces complete mappings and verifies presentation swaps preserve mechanics.
 - Established a generated neo-retro character/VFX concept anchor with documented palette, layering rules, prompt, source, and usage status.
-- Reworked the runtime cat silhouette, face, paws, encounter arm, and burst particles as the first code-native translation of that direction.
+- Added optimized transparent neutral, gallop, and jump character assets generated from the approved identity reference.
+- Integrated real character art into the title, run, jump, and encounter states while retaining separate cosmetic and Original/Candy prop layers.
+- Rebuilt the runtime city with inked silhouettes, brick texture, neon windows, fire escapes, cables, road damage, sprint streaks, and stronger lighting.
+- Reworked burst particles into distinct dust, spark, hit, heal, and loot shapes.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
 
 ## Validated
@@ -36,16 +39,19 @@ Last updated: 2026-08-21 (America/New_York)
 - Candy encounter clear and SPRINKLES reward flow
 - Candy preference persistence across reload
 - 844×390 Original and Candy encounter rendering with the revised character and prop layers
+- 568×320 contact/gallop animation and short-landscape launch layout with optimized production assets
+- 390×844 title and active encounter rendering with the generated character art
 - 390×844 live GitHub Pages start/run smoke test
 - GitHub Pages build and deployment workflow
 
 ## Next milestone
 
-Continue extracting the single-file runtime into testable modules while preserving current balance and existing local saves. The next targets are save migration and pure progression calculations, followed by deterministic run-state tests.
+Finish the layered-character pipeline with explicit skin masks and pose-aligned cosmetic anchors, then replace the remaining procedural hazards and encounter devices using the same art direction. Save migration and progression extraction remain the next architecture targets.
 
 ## Known limitations
 
 - The production runtime is still mostly the original single-file implementation.
-- Visuals remain prototype-grade pending the art-direction and asset-production milestone.
+- Non-default skin recoloring is still filter-based; dedicated per-pose masks are needed for a final cosmetic pipeline.
+- Hazards and encounter props remain code-native and need the same production-art pass.
 - Browser automation currently covers the highest-risk paths, not the full boss/cosmetic matrix.
 - The public web alpha should not be described as mobile-store ready.

@@ -37,9 +37,27 @@ for (const [index, block] of scriptBlocks.entries()) {
   }
 }
 
+const characterAssets = ['base', 'run', 'jump'];
+for (const pose of characterAssets) {
+  const path = new URL(`../public/assets/characters/street-cat-${pose}-v1.png`, import.meta.url);
+  try {
+    const png = await readFile(path);
+    const isPng = png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    if (!isPng) failures.push(`${pose} character asset must be a PNG`);
+    if (png.length > 600_000) failures.push(`${pose} character asset exceeds the 600 KB budget`);
+    if (png.length >= 26) {
+      const width = png.readUInt32BE(16), height = png.readUInt32BE(20), colorType = png[25];
+      if (width !== 768 || height !== 512) failures.push(`${pose} character asset must be 768×512`);
+      if (![4, 6].includes(colorType)) failures.push(`${pose} character asset must preserve alpha transparency`);
+    }
+  } catch (error) {
+    failures.push(`missing ${pose} character asset: ${error.message}`);
+  }
+}
+
 if (failures.length) {
   console.error(failures.map((failure) => `- ${failure}`).join('\n'));
   process.exit(1);
 }
 
-console.log(`Project checks passed: ${ids.length} unique ids and ${scriptBlocks.length} valid inline script.`);
+console.log(`Project checks passed: ${ids.length} unique ids, ${scriptBlocks.length} valid inline script, and ${characterAssets.length} production character assets.`);
