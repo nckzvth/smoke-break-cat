@@ -33,6 +33,7 @@ requireMatch(/drawTitleMascot\(/, 'title must use the shared code-drawn mascot')
 requireMatch(/drawWardrobeMascot\(/, 'wardrobe must use the shared code-drawn mascot');
 requireMatch(/drawCosmeticThumbnail\(/, 'wardrobe cards must sell cosmetics with code-drawn thumbnails');
 requireMatch(/className='cosThumb'/, 'wardrobe must render visual cosmetic cards');
+if (!/export const CAT_RUN_KEY_COUNT=RUN_KEYS\.length/.test(codeArt)) failures.push('shared mascot must expose its six-key run-cycle contract');
 if (/skin_bone:/.test(html)) failures.push('obsolete skin_bone renderer key must not return');
 if (/function catSpriteFilter\(/.test(html)) failures.push('whole-image cosmetic filters must not return');
 if (/skin-palette\.js|street-cat-[^'"\s]+\.png|cosmetics-(?:glasses|hats)-v1\.png|hazards-(?:ground|flying)-v1\.png|smokeables-(?:original|candy)-v1\.png/.test(html)) failures.push('runtime must not reference rejected generated raster art');
