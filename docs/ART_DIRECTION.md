@@ -49,6 +49,8 @@ This board is a concept anchor, not a sprite atlas. Runtime poses are generated 
 | `public/assets/characters/street-cat-jump-v1.png` | Identity-preserving generation from the neutral pose plus alpha extraction; optimized project copy | Shipped jump pose | `9b5f5d6ac68295c91afe76d0c4ab9cb8066f126b4d2541fb04a8c31d6f2d0759` |
 | `public/assets/characters/street-cat-run-cycle-v2.png` | Identity-preserving six-frame generation from the neutral pose; deterministic checkerboard-to-alpha cleanup; optimized project copy | Shipped 3×2 run-cycle atlas | `03a6b4cb7550603b5f5df74fef4b2c437ecbcc57cd08ee577d675be2f6b6478c` |
 | `public/assets/characters/street-cat-puff-cycle-v1.png` | Identity-preserving four-frame generation from the neutral pose; deterministic checkerboard-to-alpha cleanup; optimized project copy | Shipped 2×2 encounter-action atlas | `ed5659188f80eba76cf1aedbedb9730e79c9ad77232cc0240900bec704021144` |
+| `public/assets/hazards-ground-v1.png` | OpenAI built-in image generation; deterministic neutral-checkerboard-to-alpha cleanup; measured crop metadata; optimized project copy | Shipped 3×2 ground-hazard and loot atlas | `60a4f13eb3a621e6c5c96b049291b2ce138940f59c260a0f2858c1d33bcf72aa` |
+| `public/assets/hazards-flying-v1.png` | OpenAI built-in image generation; deterministic alpha extraction; measured crop metadata; optimized project copy | Shipped 3×2 two-frame aerial-hazard atlas | `5f6684c1f61253bd337668c379140475c066dac7f573bd398112130e206e190f` |
 
 Final generation prompt:
 
@@ -78,6 +80,14 @@ Encounter-action atlas:
 
 > Create exactly four sequential side-view encounter-action frames of the neutral cat in a strict 2-column by 2-row grid: tense ready, anticipation leaning into a drag or bite, strong pull/bite recoil, and recovery/exhale. Preserve the complete character identity, body volume, scale, camera angle, line weight, color, and texture. Keep the mouth corner as the animation pivot for a separate runtime prop, keep contact paws on a shared ground line, and include no prop, smoke, confetti, effect, floor, shadow, labels, or background.
 
+Ground-hazard atlas:
+
+> Create exactly six isolated side-view game sprites in a strict 3-column by 2-row grid: crushed silver street can, battered orange traffic cone, red fire hydrant, low iridescent oil puddle, hostile gray pigeon facing left, and gold/midnight/mint loot chest. Match the approved grimy neo-retro arcade direction with heavy ink, compact readable silhouettes, limited shading, chipped screen-print texture, generous cell padding, consistent camera angle, and no labels, dividers, scenery, extra objects, or redesign.
+
+Aerial-hazard atlas:
+
+> Create exactly six isolated side-view game sprites in a strict 3-column by 2-row grid: crow facing left with wings up, crow facing left with wings down, bat facing left with wings up, bat facing left with wings down, compact street-surveillance drone level, and the same drone banking. Match the approved heavy-ink, limited-shading, grimy arcade style; keep animation pairs identity-locked, centered, and readable at phone scale with no labels, dividers, trails, floor, shadows, scenery, or extra objects.
+
 The original individual poses required targeted background extraction because their first versions used baked checkerboards. The run-cycle generator also baked its checkerboard into the PNG; two constrained extraction edits still returned RGB files, so the shipped atlas uses a deterministic neutral-checkerboard-to-alpha conversion with softened antialiased edge pixels. The full-resolution generated originals remain unmodified outside the project copy.
 
 ## Runtime implementation
@@ -88,5 +98,8 @@ The original individual poses required targeted background extraction because th
 - Encounters advance through ready, anticipation, pull/bite recoil, and recovery frames on a 340 ms input cadence. Rapid hold input restarts only after the impact phase so it cannot trap the cat on one pose.
 - The single separate Original/Candy prop layer follows per-frame measured mouth sockets through the same foot-pivot scale and rotation matrix. Stick props flip toward the facing direction; devices use per-visual mouthpiece, hose, straw, or serving-edge sockets. The former duplicate pedestal prop is not rendered during encounters.
 - Original puff VFX use thin inked curls, partial arcs, and small translucent cores. Candy mode emits outlined directional sprinkles; neither effect obscures the character action.
+- Ground hazards now use measured atlas crops and bottom anchors so illustrated silhouettes replace the procedural placeholders without changing collision geometry. Puddle width, pigeon posture, and hydrant height deliberately exaggerate visual anticipation while preserving the original hit boxes.
+- Crows, bats, and drones alternate between two authored frames using the existing flap clock. Their collision rectangles, sine-wave paths, trajectory ribbons, and low-swoop warning remain deterministic and unchanged.
+- Floating loot uses the same production atlas, retaining the existing bob, aura, suspension hooks, reward rules, and headbutt collision contract.
 - The city renderer now uses inked building silhouettes, brick lines, neon windows, fire escapes, cables, road cracks, moon glow, sprint streaks, and a screen vignette.
 - Hats and glasses remain separate canvas layers. Skin palette filters are provisional until dedicated color masks or layered sprites replace them.
