@@ -39,6 +39,8 @@ Last updated: 2026-08-22 (America/New_York)
 - Extracted warm-fur classification and luminance-preserving palette math into a tested rendering module with protected-color regression coverage.
 - Extracted a versioned save schema and guarded persistence adapter while retaining both historical browser keys. Existing saves migrate in place without changing progression, balance, cosmetics, mute state, or content mode.
 - Added independent corrupt-current/valid-legacy recovery, numeric and upgrade repair, forward-field preservation, equipped-cosmetic retention, blocked-storage session fallback, and portable JSON backup download/restore controls in the wardrobe.
+- Extracted upgrade costs/caps, player power, combo behavior, encounter health/rewards, boss cadence, loot boundaries, and cosmetic unlock conditions into one deterministic progression module without changing shipped balance.
+- Added a query-gated, session-only playtest lab that reaches every boss, cycles street encounters, switches presentation modes, grants temporary PACKS, restores health, and unlocks the full wardrobe without writing to the player's real browser save.
 - Rebuilt the runtime city with inked silhouettes, brick texture, neon windows, fire escapes, cables, road damage, sprint streaks, and stronger lighting.
 - Reworked burst particles into distinct dust, spark, hit, heal, and loot shapes.
 - Verified the live build starts and runs at a mobile viewport without console warnings or errors.
@@ -77,19 +79,22 @@ Last updated: 2026-08-22 (America/New_York)
 - Animated wardrobe review of Calico, Blackout, Snowball, Neon, and Bone Cat extremes with preserved authored face details and unchanged cosmetic layers
 - 568×320 Tuxedo run, jump, ready, and recoil frames plus 390×844 run/encounter coverage through the pose-aware palette cache
 - Unit coverage proving ginger fur recolors while gold eyes, cream muzzle, pink nose, and black ink remain byte-identical
-- Fourteen-test suite covering defaults, legacy migration, corrupt-current recovery, partial/hostile repair, future-field preservation, current-save stability, storage failure, and portable backup round trips
+- Twenty-two-test suite covering progression parity, loot boundaries, boss cadence, unlock evaluation, defaults, legacy migration, corrupt-current recovery, partial/hostile repair, future-field preservation, current-save stability, storage failure, and portable backup round trips
 - Real existing-browser migration at 390×844 preserving 74 Ash, 294 m best, two air dodges, Tux ownership/equip state, and Original/Candy preference across repeated writes and reloads
+- Query-gated lab entry and complete control layout at 390×844, plus immediate Original Vape Lord and Candy Candy Crusher boss loads with correct real encounter tiers
+- Candy Cursed Sundae and Phantom Gumball Machine boss/device rendering at 568×320, including corrected long-name, toast, health-meter, and lab-control clearance
+- Session-only unlock-all cosmetic preview with Hell Tiger, Laser Visor, and Traffic Cone King, plus a separate normal-URL reload proving temporary Candy mode, PACKS, and unlock mutations did not persist
 - GitHub Pages build and deployment workflow
 
 ## Next milestone
 
-Extract progression rules behind tests, then add developer encounter shortcuts and visual snapshots before calling the full boss/device matrix covered.
+Add automated visual snapshot baselines and broader gameplay state-transition coverage, then profile maximum-effects frame pacing on target phones.
 
 ## Known limitations
 
 - The production runtime is still mostly the original single-file implementation.
 - Skin recoloring is pose-aware and selective, but patterns remain compact code-native overlays rather than authored texture layers for every pose.
 - Encounter devices and sticks use production art; their loading fallback, gameplay-critical burn cues, collision-independent effects, hazard collision, and warning overlays intentionally remain code-native.
-- Browser automation currently covers the highest-risk paths, not the full boss/cosmetic matrix.
+- The lab makes the full boss/cosmetic matrix reachable without grinding, but browser snapshot comparison is still manual rather than pixel-diff automated.
 - Portable backups are manual downloads; optional cloud synchronization is not part of the public-alpha scope.
 - The public web alpha should not be described as mobile-store ready.

@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+const progression = await readFile(new URL('../src/game/progression.js', import.meta.url), 'utf8');
 const failures = [];
 
 function requireMatch(pattern, message) {
@@ -21,11 +22,16 @@ requireMatch(/cosmetics-hats-v1\.png/, 'runtime must load the production hat atl
 requireMatch(/smokeables-original-v1\.png/, 'runtime must load the Original-mode smokeable atlas');
 requireMatch(/smokeables-candy-v1\.png/, 'runtime must load the Candy-mode smokeable atlas');
 requireMatch(/state\/save-schema\.js/, 'runtime must load the versioned save schema module');
+requireMatch(/game\/progression\.js/, 'runtime must load the deterministic progression module');
 requireMatch(/loadStoredSave\(saveStorage\)/, 'runtime must load progress through the migration adapter');
 requireMatch(/writeStoredSave\(saveStorage,save\)/, 'runtime must persist progress through the guarded storage adapter');
 requireMatch(/id="exportSaveBtn"/, 'wardrobe must expose save backup download');
 requireMatch(/id="importSaveBtn"/, 'wardrobe must expose save backup restore');
 requireMatch(/parseSaveBackup/, 'backup restore must use validated save parsing');
+requireMatch(/id="playtestToggle" hidden/, 'playtest lab entry point must be hidden by default');
+requireMatch(/get\('playtest'\)==='1'/, 'playtest lab must require an explicit query gate');
+requireMatch(/if\(playtestEnabled\)\{document\.documentElement\.dataset\.saveStatus='playtest-session';return true;\}/, 'playtest mutations must never write to the real save');
+requireMatch(/data-playtest-boss="machine"/, 'playtest lab must reach every production boss tier');
 requireMatch(/drawSmokeableAtlas\(v,ratio,held\)/, 'runtime must render production encounter devices through the atlas path');
 requireMatch(/\.26\+\.74\*ratio/, 'atlas sticks must preserve burn-down state toward the mouth socket');
 requireMatch(/id:'skin_skeleton'/, 'Bone Cat must use the real skin_skeleton renderer key');
@@ -40,6 +46,10 @@ requireMatch(/drawHat\(hat,eyeLocal\[0\]-6,eyeLocal\[1\]-23,t\)/, 'hats must ren
 if (/skin_bone:/.test(html)) failures.push('obsolete skin_bone renderer key must not return');
 if (/function catSpriteFilter\(/.test(html)) failures.push('whole-image cosmetic filters must not return');
 if (/localStorage\.setItem/.test(html)) failures.push('runtime must not bypass the guarded save adapter');
+if (/function passiveDps\(|function tapPower\(|function baseMaxHearts\(/.test(html)) failures.push('progression formulas must not drift back into the runtime');
+for (const exportName of ['UPGRADE_RULES','encounterMaxHp','encounterAshReward','boxRewardFromRoll','bossIndexForEncounter','meetsUnlockCondition']) {
+  if (!new RegExp(`export (?:const|function) ${exportName}`).test(progression)) failures.push(`progression module must export ${exportName}`);
+}
 for (const style of ['shades','round','heart','pit','cyber','star','goggles','monocle','threeD','lightning','laser']) {
   requireMatch(new RegExp(`${style}:\\{frame:`), `missing production eyewear mapping for ${style}`);
 }

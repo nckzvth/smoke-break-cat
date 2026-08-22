@@ -12,9 +12,10 @@ Turn the playable prototype into a reliable public web alpha on GitHub Pages, th
 - The confirmed compact-layout and mid-encounter rotation blockers are repaired in the production entry point.
 - The first extracted module now owns the tested two-mode presentation registry, and Little Baby Idiot Mode covers every current encounter.
 - A generated character/VFX direction board defines the target silhouette, palette, layering, and effects language; identity-locked character cycles plus production hazard, loot, eyewear, hat, and paired Original/Candy encounter-device atlases now implement that direction in the runtime.
-- Full modularization, broader automated gameplay coverage, accessibility work, and visual production remain active roadmap items.
-- The visual-overhaul slice now covers the hero, run/action animation, pose-aware skin recoloring, hazards, loot, cosmetics, environment motion, encounter staging, and every encounter prop. Save/progression extraction and broader visual regression coverage are the next major production gaps.
-- Versioned save migration, corrupt-save recovery, storage-failure fallback, and manual JSON backup/restore are now implemented behind a tested adapter while preserving both historical browser keys. Progression-rule extraction and broader visual regression coverage remain active gaps.
+- Full modularization, broader automated gameplay coverage, accessibility work, and visual snapshot automation remain active roadmap items.
+- The visual-overhaul slice now covers the hero, run/action animation, pose-aware skin recoloring, hazards, loot, cosmetics, environment motion, encounter staging, and every encounter prop.
+- Versioned save migration, corrupt-save recovery, storage-failure fallback, and manual JSON backup/restore are implemented behind a tested adapter while preserving both historical browser keys.
+- Progression costs, combat power, encounter health/rewards, loot boundaries, boss cadence, and unlock conditions now live in one deterministic tested module. A query-gated, session-only lab reaches every boss, street encounter, presentation mode, and cosmetic without touching the real save.
 
 ## Non-negotiable launch gates
 
@@ -120,6 +121,8 @@ Exit criteria:
 - All bosses and cosmetics can be validated without manual grinding.
 - No known soft locks, progression dead ends, or mode-specific economy changes remain.
 - Target phones sustain acceptable frame pacing during maximum effects.
+
+Current slice status: progression parity tests and safe developer shortcuts are complete. Automated state-transition coverage, recorded balance telemetry, performance profiling, and visual snapshot baselines remain.
 
 ## Milestone 6 — Public-alpha operations
 

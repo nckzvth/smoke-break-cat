@@ -1,13 +1,14 @@
 import { CONTENT_MODE, normalizeContentMode } from '../content/content-modes.js';
+import { UPGRADE_RULES } from '../game/progression.js';
 
 export const SAVE_VERSION = 2;
 export const SAVE_KEY = 'smokeBreakCat_overdrive_v1';
 export const LEGACY_SAVE_KEY = 'smokeBreakCat_v1';
 
-const LEVEL_CAPS = {
-  up: { autoPuff: 10, deepIdle: 8, hotStart: 5, bigDrag: 10, crit: 8, combo: 8 },
-  meta: { lungs: 3, scavenger: 5, weird: 5 },
-};
+const LEVEL_CAPS = Object.entries(UPGRADE_RULES).reduce((caps, [key, rule]) => {
+  caps[rule.category][key] = rule.max;
+  return caps;
+}, { up: {}, meta: {} });
 
 const COUNTER_KEYS = ['ash', 'packs', 'best', 'smoked', 'bosses', 'runs'];
 const STAT_KEYS = ['boxesOpened', 'nearMisses', 'sprintNearMisses', 'ghostTrips', 'cosmeticFinds', 'totalDistance'];
