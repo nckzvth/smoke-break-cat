@@ -11,6 +11,7 @@ Smoke Break Cat is a thick-ink midnight sticker cartoon about one permanently un
 - long horizontal body and question-mark tail;
 - chunky ribcage, grounded haunches, connected chest, and readable front/back paws;
 - oversized angular head and ears;
+- a three-quarter face aimed into the run direction; the mascot must never stare squarely at the camera;
 - hostile yellow eyes with heavy brows;
 - cream muzzle, pink nose, one stupid snaggletooth;
 - black bandana and tiny metal stud;
